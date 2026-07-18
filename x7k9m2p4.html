@@ -18,6 +18,14 @@
             margin-bottom: 12px;
         }
         .ip-display .ip-value { color: #00d4ff; font-weight: 600; }
+        .login-error {
+            color: #ff6b81;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 8px;
+            display: none;
+        }
+        .login-error.show { display: block; }
     </style>
 </head>
 <body>
@@ -28,15 +36,21 @@
             <div class="sub">Admin Panel</div>
         </div>
 
+        <!-- LOGIN -->
         <div id="login-box">
             <div class="form-group">
-                <label>Admin Password</label>
+                <label>👤 Username</label>
+                <input type="text" id="adminUser" placeholder="Enter admin username..." onkeydown="if(event.key==='Enter') adminLogin()">
+            </div>
+            <div class="form-group">
+                <label>🔑 Password</label>
                 <input type="password" id="adminPass" placeholder="Enter admin password..." onkeydown="if(event.key==='Enter') adminLogin()">
             </div>
             <button class="btn" onclick="adminLogin()">Login</button>
-            <div id="loginMsg" class="msg"></div>
+            <div id="loginMsg" class="login-error"></div>
         </div>
 
+        <!-- DASHBOARD -->
         <div id="dashboard" class="hidden">
             <div class="quota">
                 <span>Key Quota</span>
@@ -113,39 +127,41 @@
         let adminIp = '';
 
         function adminLogin() {
-            const pass = document.getElementById('adminPass').value.trim();
+            const username = document.getElementById('adminUser').value.trim();
+            const password = document.getElementById('adminPass').value.trim();
             const msg = document.getElementById('loginMsg');
 
-            if (!pass) {
-                msg.className = 'msg error';
-                msg.textContent = 'Please enter password!';
+            if (!username || !password) {
+                msg.textContent = '⚠️ Please enter username and password!';
+                msg.className = 'login-error show';
                 return;
             }
+
+            msg.className = 'login-error';
+            msg.textContent = '';
 
             fetch('/api/admin-login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: 'admin_vip', password: pass })
+                body: JSON.stringify({ username: username, password: password })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    currentAdmin = 'admin_vip';
+                    currentAdmin = username;
                     adminIp = data.ip || 'Not set';
                     document.getElementById('login-box').classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
                     document.getElementById('adminIp').textContent = adminIp;
-                    msg.className = 'msg';
-                    msg.textContent = '';
                     loadKeys();
                 } else {
-                    msg.className = 'msg error';
-                    msg.textContent = data.error || 'Invalid password!';
+                    msg.textContent = '❌ ' + (data.error || 'Login failed!');
+                    msg.className = 'login-error show';
                 }
             })
             .catch(() => {
-                msg.className = 'msg error';
-                msg.textContent = 'Connection error!';
+                msg.textContent = '❌ Connection error!';
+                msg.className = 'login-error show';
             });
         }
 
@@ -153,6 +169,7 @@
             currentAdmin = null;
             document.getElementById('login-box').classList.remove('hidden');
             document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('adminUser').value = '';
             document.getElementById('adminPass').value = '';
         }
 
