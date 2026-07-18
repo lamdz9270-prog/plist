@@ -3,267 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Panel - Configuration Centre</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a12;
-            color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 620px;
-            width: 100%;
-            background: rgba(18, 18, 30, 0.85);
-            border-radius: 28px;
-            padding: 34px 28px;
-            border: 1px solid rgba(212, 0, 255, 0.15);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-        }
-        .header { text-align: center; margin-bottom: 28px; }
-        .header .icon { font-size: 44px; margin-bottom: 4px; }
-        .header h1 {
-            font-size: 26px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff6b6b, #ff4757);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .header .sub {
-            font-size: 12px;
-            color: rgba(255,255,255,0.3);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-        .navbar {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-        .navbar a {
-            color: rgba(255,255,255,0.3);
-            text-decoration: none;
-            font-size: 13px;
-            padding: 6px 16px;
-            border-radius: 20px;
-            transition: 0.3s;
-            border: 1px solid transparent;
-        }
-        .navbar a:hover {
-            color: #e0e0e0;
-            border-color: rgba(255,255,255,0.1);
-        }
-        .navbar a.active {
-            color: #ff6b6b;
-            border-color: rgba(255, 107, 107, 0.3);
-            background: rgba(255, 107, 107, 0.05);
-        }
-        .form-group { margin-bottom: 16px; }
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 5px;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px 14px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            font-size: 15px;
-            color: #e0e0e0;
-            outline: none;
-            transition: 0.3s;
-            font-family: inherit;
-        }
-        input:focus, select:focus {
-            border-color: #ff6b6b;
-            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
-        }
-        input::placeholder {
-            color: rgba(255,255,255,0.2);
-        }
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #ff6b6b, #ff4757);
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #fff;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.08);
-        }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.15);
-            box-shadow: none;
-        }
-        .msg {
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            margin-top: 12px;
-            display: none;
-        }
-        .msg.error {
-            display: block;
-            background: rgba(255, 71, 87, 0.15);
-            color: #ff6b81;
-            border: 1px solid rgba(255, 71, 87, 0.2);
-        }
-        .msg.success {
-            display: block;
-            background: rgba(0, 212, 255, 0.1);
-            color: #00d4ff;
-            border: 1px solid rgba(0, 212, 255, 0.15);
-        }
-        .hidden { display: none; }
-        .admin-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            margin-bottom: 6px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .admin-item .name { color: #ff6b6b; font-weight: 600; }
-        .admin-item .badge {
-            font-size: 11px;
-            padding: 2px 12px;
-            border-radius: 20px;
-            background: rgba(0, 212, 255, 0.1);
-            color: #00d4ff;
-        }
-        .admin-item .badge.inactive {
-            background: rgba(255, 71, 87, 0.1);
-            color: #ff6b81;
-        }
-        .admin-item .actions {
-            display: flex;
-            gap: 6px;
-        }
-        .admin-item .actions button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            transition: 0.2s;
-            color: rgba(255,255,255,0.4);
-        }
-        .admin-item .actions button:hover {
-            background: rgba(255,255,255,0.05);
-        }
-        .admin-item .actions .del { color: #ff6b81; }
-        .admin-item .actions .del:hover { background: rgba(255, 107, 107, 0.1); }
-        .brand {
-            text-align: center;
-            color: rgba(255,255,255,0.1);
-            font-size: 11px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: 20px;
-        }
-        @media (max-width: 480px) {
-            .container { padding: 20px 16px; }
-        }
-    </style>
+    <title>Configplist OptiSystem⚡️ - Master</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container" id="app">
         <div class="header">
             <div class="icon">👑</div>
-            <h1>Master Panel</h1>
-            <div class="sub">Configuration Centre</div>
+            <h1>Configplist OptiSystem⚡️</h1>
+            <div class="sub">Master Panel</div>
         </div>
 
-        <div class="navbar">
-            <a href="/index.html">🔑 User</a>
-            <a href="/x7k9m2p4.html">👑 Admin</a>
-            <a href="/q8w5e3r1.html" class="active">👑 Master</a>
-        </div>
-
-        <!-- LOGIN -->
         <div id="login-box">
             <div class="form-group">
-                <label>👑 Tên đăng nhập</label>
-                <input type="text" id="masterUser" placeholder="Nhập tên đăng nhập..." value="nguyenduclam">
+                <label>Master Username</label>
+                <input type="text" id="masterUser" placeholder="Enter username..." value="nguyenduclam">
             </div>
             <div class="form-group">
-                <label>🔑 Mật khẩu Master</label>
-                <input type="password" id="masterPass" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') masterLogin()">
+                <label>Master Password</label>
+                <input type="password" id="masterPass" placeholder="Enter password..." onkeydown="if(event.key==='Enter') masterLogin()">
             </div>
-            <button class="btn" onclick="masterLogin()">Đăng nhập →</button>
+            <button class="btn" onclick="masterLogin()">Login</button>
             <div id="loginMsg" class="msg"></div>
         </div>
 
-        <!-- DASHBOARD -->
         <div id="dashboard" class="hidden">
             <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
-                <span style="font-size:14px;color:rgba(255,255,255,0.4);">📦 Tổng admin: <strong id="totalAdmins" style="color:#ff6b6b;">0</strong></span>
-                <span style="font-size:14px;color:rgba(255,255,255,0.4);">🔑 Tổng key: <strong id="totalKeys" style="color:#ff6b6b;">0</strong></span>
+                <span style="font-size:14px;color:rgba(255,255,255,0.4);">Total Admins: <strong id="totalAdmins" style="color:#ff6b6b;">0</strong></span>
+                <span style="font-size:14px;color:rgba(255,255,255,0.4);">Total Keys: <strong id="totalKeys" style="color:#ff6b6b;">0</strong></span>
             </div>
 
             <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;">
-                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">➕ Tạo Admin Con</h2>
+                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">Create Admin</h2>
 
                 <div class="form-group">
-                    <label>👤 Tên đăng nhập</label>
+                    <label>Username</label>
                     <input type="text" id="newAdminUser" placeholder="VD: admin2">
                 </div>
                 <div class="form-group">
-                    <label>🔑 Mật khẩu</label>
-                    <input type="text" id="newAdminPass" placeholder="Mật khẩu admin con">
+                    <label>Password</label>
+                    <input type="text" id="newAdminPass" placeholder="Password for admin">
                 </div>
                 <div class="form-group">
-                    <label>📛 Tên hiển thị</label>
+                    <label>Display Name</label>
                     <input type="text" id="newAdminName" placeholder="VD: Admin 2">
                 </div>
                 <div class="form-group">
-                    <label>📱 Zalo</label>
+                    <label>Zalo</label>
                     <input type="text" id="newAdminZalo" placeholder="VD: 0879072010" value="0879072010">
                 </div>
                 <div class="form-group">
-                    <label>📦 Quota key</label>
+                    <label>Key Quota</label>
                     <input type="number" id="newAdminQuota" value="50" min="1">
                 </div>
 
-                <button class="btn" onclick="createAdmin()">Tạo admin →</button>
+                <button class="btn" onclick="createAdmin()">Create Admin</button>
                 <div id="createMsg" class="msg"></div>
             </div>
 
             <div class="key-list" style="margin-top:20px;">
-                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">📋 Danh sách Admin</h2>
+                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">Admin List</h2>
                 <div id="adminList"></div>
             </div>
 
             <div style="margin-top:16px;text-align:center;">
-                <a href="#" onclick="masterLogout(); return false;" style="color:rgba(255,255,255,0.2);font-size:13px;text-decoration:none;">🚪 Đăng xuất</a>
+                <a href="#" onclick="masterLogout(); return false;" style="color:rgba(255,255,255,0.2);font-size:13px;text-decoration:none;">Logout</a>
             </div>
         </div>
 
-        <div class="brand">CONFIGURATION CENTRE 🧩 · DUCLAM.NET</div>
+        <div class="brand">CONFIGPLIST OPTISYSTEM ⚡️ · DUCLAM.NET</div>
     </div>
 
     <script>
@@ -276,7 +84,7 @@
 
             if (!username || !password) {
                 msg.className = 'msg error';
-                msg.textContent = '⚠️ Vui lòng nhập đầy đủ thông tin!';
+                msg.textContent = 'Please enter username and password!';
                 return;
             }
 
@@ -296,12 +104,12 @@
                     loadAdmins();
                 } else {
                     msg.className = 'msg error';
-                    msg.textContent = '❌ Sai tên đăng nhập hoặc mật khẩu!';
+                    msg.textContent = 'Invalid username or password!';
                 }
             })
             .catch(() => {
                 msg.className = 'msg error';
-                msg.textContent = '❌ Lỗi kết nối server!';
+                msg.textContent = 'Connection error!';
             });
         }
 
@@ -322,7 +130,7 @@
 
             if (!username || !password) {
                 msg.className = 'msg error';
-                msg.textContent = '⚠️ Vui lòng nhập tên và mật khẩu!';
+                msg.textContent = 'Username and password are required!';
                 return;
             }
 
@@ -343,7 +151,7 @@
             .then(data => {
                 if (data.success) {
                     msg.className = 'msg success';
-                    msg.textContent = `✅ Tạo admin thành công!\n👤 ${username} | Quota: ${quota} key`;
+                    msg.textContent = '✅ Admin created: ' + username + ' (Quota: ' + quota + ')';
                     loadAdmins();
                     document.getElementById('newAdminUser').value = '';
                     document.getElementById('newAdminPass').value = '';
@@ -352,12 +160,12 @@
                     document.getElementById('newAdminQuota').value = '50';
                 } else {
                     msg.className = 'msg error';
-                    msg.textContent = '❌ ' + (data.error || 'Lỗi tạo admin!');
+                    msg.textContent = data.error || 'Error creating admin!';
                 }
             })
             .catch(() => {
                 msg.className = 'msg error';
-                msg.textContent = '❌ Lỗi kết nối server!';
+                msg.textContent = 'Connection error!';
             });
         }
 
@@ -372,35 +180,36 @@
                 const container = document.getElementById('adminList');
                 document.getElementById('totalAdmins').textContent = data.admins.length;
 
-                // Đếm tổng key
                 let totalKeys = 0;
                 data.admins.forEach(a => { totalKeys += a.keysUsed || 0; });
                 document.getElementById('totalKeys').textContent = totalKeys;
 
                 if (!data.admins || data.admins.length === 0) {
-                    container.innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">Chưa có admin nào</div>';
+                    container.innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">No admins</div>';
                     return;
                 }
 
                 let html = '';
                 data.admins.forEach(a => {
                     const statusClass = a.isActive ? '' : 'inactive';
-                    const statusText = a.isActive ? '🟢 Hoạt động' : '🔴 Đã khóa';
+                    const statusText = a.isActive ? '🟢 Active' : '🔴 Locked';
+                    const ipDisplay = a.registered_ip || '🔴 Not set';
 
                     html += `
                     <div class="admin-item">
                         <div>
                             <div class="name">${a.displayName || a.username}</div>
                             <div style="font-size:11px;color:rgba(255,255,255,0.3);">
-                                ${a.username} · ${a.keysUsed || 0}/${a.keyQuota || 0} key
-                                · Zalo: ${a.zalo || 'Chưa có'}
+                                ${a.username} · ${a.keysUsed || 0}/${a.keyQuota || 0} keys
+                                · Zalo: ${a.zalo || 'N/A'}
+                                · IP: ${ipDisplay}
                             </div>
                         </div>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span class="badge ${statusClass}">${statusText}</span>
                             <div class="actions">
-                                <button onclick="editQuota('${a.username}')" title="Sửa quota">✏️</button>
-                                <button class="del" onclick="deleteAdmin('${a.username}')" title="Xóa admin">🗑️</button>
+                                <button onclick="editQuota('${a.username}')" title="Edit quota">✏️</button>
+                                <button class="del" onclick="deleteAdmin('${a.username}')" title="Delete admin">🗑️</button>
                             </div>
                         </div>
                     </div>
@@ -409,16 +218,16 @@
                 container.innerHTML = html;
             })
             .catch(() => {
-                document.getElementById('adminList').innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">Lỗi tải danh sách admin</div>';
+                document.getElementById('adminList').innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">Error loading admins</div>';
             });
         }
 
         function editQuota(username) {
-            const newQuota = prompt(`Nhập quota mới cho admin ${username}:`);
+            const newQuota = prompt('Enter new quota for ' + username + ':');
             if (newQuota === null) return;
             const quota = parseInt(newQuota);
             if (isNaN(quota) || quota < 1) {
-                alert('⚠️ Vui lòng nhập số hợp lệ!');
+                alert('Please enter a valid number!');
                 return;
             }
 
@@ -435,17 +244,17 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ Cập nhật quota thành công!');
+                    alert('✅ Quota updated!');
                     loadAdmins();
                 } else {
-                    alert('❌ Lỗi cập nhật quota!');
+                    alert('Error updating quota!');
                 }
             })
-            .catch(() => alert('❌ Lỗi kết nối server!'));
+            .catch(() => alert('Connection error!'));
         }
 
         function deleteAdmin(username) {
-            if (!confirm(`Xóa admin ${username}? (Tất cả key của admin này cũng sẽ bị xóa)`)) return;
+            if (!confirm('Delete admin ' + username + '? All their keys will also be deleted.')) return;
 
             fetch('/api/master-delete-admin', {
                 method: 'POST',
@@ -461,10 +270,10 @@
                 if (data.success) {
                     loadAdmins();
                 } else {
-                    alert('❌ Lỗi xóa admin!');
+                    alert('Error deleting admin!');
                 }
             })
-            .catch(() => alert('❌ Lỗi kết nối server!'));
+            .catch(() => alert('Connection error!'));
         }
     </script>
 </body>
