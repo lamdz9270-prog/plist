@@ -3,6 +3,8 @@ import json
 import urllib.parse
 import os
 import time
+import random
+import string
 from datetime import datetime, timedelta
 import uuid
 
@@ -22,6 +24,13 @@ DB = {
 }
 
 # ============================================================
+# HÀM TẠO KEY 8 KÝ TỰ
+# ============================================================
+def generate_key():
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choices(chars, k=8))
+
+# ============================================================
 # HÀM XỬ LÝ ADMIN
 # ============================================================
 def find_admin(username):
@@ -31,7 +40,6 @@ def find_admin(username):
     return None
 
 def admin_login_check(username, password, ip):
-    """Kiểm tra đăng nhập admin + IP lock"""
     admin = find_admin(username)
     if not admin:
         return {"success": False, "error": "Admin not found!"}
@@ -40,7 +48,6 @@ def admin_login_check(username, password, ip):
     if not admin.get("isActive", True):
         return {"success": False, "error": "Account is locked!"}
     
-    # 🔥 KIỂM TRA IP LOCK
     registered_ip = admin.get("registered_ip")
     if registered_ip and registered_ip != ip:
         return {
@@ -48,7 +55,6 @@ def admin_login_check(username, password, ip):
             "error": f"IP not allowed! This account is locked to IP: {registered_ip}"
         }
     
-    # Lần đầu đăng nhập -> lưu IP
     if not registered_ip:
         admin["registered_ip"] = ip
         for i, a in enumerate(DB["admins"]):
@@ -69,9 +75,8 @@ def create_key(package, expires_days, max_devices, features, custom_dns, admin_u
     if admin["keysUsed"] >= admin["keyQuota"]:
         return {"success": False, "error": "Key quota exceeded!"}
     
-    prefix = package.upper()[:3]
-    hash_code = hex(int(time.time() * 1000))[2:8].upper()
-    key_code = f"{prefix}-{datetime.now().strftime('%Y%m%d')}-{hash_code}-{str(int(time.time()) % 900 + 100)}"
+    # 🔥 Tạo key 8 ký tự
+    key_code = generate_key()
     
     new_key = {
         "keyCode": key_code,
@@ -537,7 +542,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         except:
             data = {}
         
-        # 🔥 Admin Login (có IP Lock)
+        # 🔥 Admin Login (có Username + Password + IP Lock)
         if path == "/api/admin-login":
             username = data.get("username", "")
             password = data.get("password", "")
@@ -745,5 +750,6 @@ if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", port), MyHandler)
     print(f"Server running at http://0.0.0.0:{port}")
     print(f"Master: {MASTER_USERNAME}")
+    print("✅ Key format: 8 characters (e.g. A1B2C3D4)")
     print("✅ Each admin can only login from 1 IP (locked on first login)")
     server.serve_forever()
