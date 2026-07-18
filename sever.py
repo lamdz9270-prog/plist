@@ -14,21 +14,10 @@ MASTER_USERNAME = "nguyenduclam"
 MASTER_PASSWORD = "ngduclamcute1201"
 
 # ============================================================
-# DATABASE
+# DATABASE (KHÔNG CÓ ADMIN MẶC ĐỊNH)
 # ============================================================
 DB = {
-    "admins": [
-        {
-            "username": "admin_vip",
-            "password": "Admin@2026",
-            "displayName": "Admin VIP",
-            "zalo": "0879072010",
-            "createdAt": datetime.now().isoformat(),
-            "isActive": True,
-            "keyQuota": 50,
-            "keysUsed": 0
-        }
-    ],
+    "admins": [],  # 👈 Master sẽ tạo admin con
     "keys": [],
     "usageLogs": []
 }
@@ -485,7 +474,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 <head><title>403 Forbidden</title></head>
                 <body style="text-align:center;font-family:sans-serif;padding:50px;background:#0a0a12;color:#e0e0e0;">
                     <h1>🚫 403 Forbidden</h1>
-                    <p>Access denied. Please use the main interface.</p>
+                    <p>Access denied.</p>
                     <p><a href="/" style="color:#7b61ff;text-decoration:none;">← Back to home</a></p>
                 </body>
                 </html>
@@ -710,7 +699,8 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({
                 "success": True,
-                "admin": new_admin
+                "admin": new_admin,
+                "message": f"✅ Admin {username} created!"
             }).encode())
             return
         
@@ -767,5 +757,5 @@ if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", port), MyHandler)
     print(f"🚀 Server running at http://0.0.0.0:{port}")
     print(f"👑 Master: {MASTER_USERNAME}")
-    print(f"🔒 Admin: admin_vip / Admin@2026")
+    print(f"📌 No default admin. Master must create admin accounts.")
     server.serve_forever()
