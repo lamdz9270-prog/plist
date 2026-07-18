@@ -8,20 +8,20 @@ from datetime import datetime, timedelta
 import uuid
 
 # ============================================================
-# 🔒 THÔNG TIN MASTER (ĐÃ ĐỔI TÊN)
+# 🔒 THÔNG TIN MASTER (CỦA BẠN)
 # ============================================================
-MASTER_USERNAME = "admin_master"      # Tên đăng nhập master
-MASTER_PASSWORD = "SecurePass@2026"   # Mật khẩu master (đổi thành mật khẩu mạnh)
+MASTER_USERNAME = "nguyenduclam"
+MASTER_PASSWORD = "ngduclamcute1201"
 
 # ============================================================
-# DATABASE (Đã đổi tên admin mặc định)
+# DATABASE
 # ============================================================
 DB = {
     "admins": [
         {
-            "username": "admin_vip",           # Tên đăng nhập admin con
-            "password": "Admin@2026",          # Mật khẩu admin con
-            "displayName": "Admin VIP",        # Tên hiển thị
+            "username": "admin_vip",
+            "password": "Admin@2026",
+            "displayName": "Admin VIP",
             "zalo": "0879072010",
             "createdAt": datetime.now().isoformat(),
             "isActive": True,
@@ -60,7 +60,7 @@ def create_key(package, expires_days, max_devices, features, custom_dns, admin_u
         "isActive": True
     }
     
-    if custom_dns and features.get("reduceLag"):
+    if custom_dns and features.get("reduce_lag"):
         new_key["features"]["customDns"] = custom_dns
     
     DB["keys"].append(new_key)
@@ -247,7 +247,7 @@ def generate_mobile_config(key_data, udid):
         <true/>
     </dict>'''
 
-    # 6️⃣ RAM Clean (No direct iOS config, but placeholder)
+    # 6️⃣ RAM Clean
     if features.get("ram_clean"):
         xml += '''
     <dict>
@@ -448,8 +448,13 @@ def generate_mobile_config(key_data, udid):
 # ============================================================
 class MyHandler(SimpleHTTPRequestHandler):
     
-    # File cần bảo vệ (không truy cập trực tiếp)
-    PROTECTED_FILES = ['admin.html', 'master.html', 'admin.js', 'master.js']
+    # File cần bảo vệ (tên khó đoán)
+    PROTECTED_FILES = [
+        'z9x8c7v6b5n4.html',  # admin.html
+        'm3k2j1h0g9f8.html',  # master.html
+        'admin.js',
+        'master.js'
+    ]
     
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -512,10 +517,6 @@ class MyHandler(SimpleHTTPRequestHandler):
         # ===== PHỤC VỤ FILE THƯỜNG =====
         if path == "/" or path == "":
             path = "/index.html"
-        elif path == "/admin":
-            path = "/admin.html"
-        elif path == "/master":
-            path = "/master.html"
         
         if path.endswith(".py") or path.endswith(".json"):
             self.send_response(403)
@@ -640,20 +641,84 @@ class MyHandler(SimpleHTTPRequestHandler):
             master_pass = data.get("master_password", "")
             if master_user != MASTER_USERNAME or master_pass != MASTER_PASSWORD:
                 self.send_response(401)
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": "Unauthorized!"}).encode())
+                return
+            
+            username = data.get("username", "").strip()
+            if not username:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": "Username is required!"}).encode())
+                return
+            
+            if any(a["username"] == username for a in DB["admins"]):
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": "Username already exists!"}).encode())
                 return
             
             new_admin = {
-                "username": data.get("username", ""),
-                "password": data.get("password", ""),
-                "displayName": data.get("displayName", ""),
+                "username": username,
+                "password": data.get("password", "Admin@123"),
+                "displayName": data.get("displayName", username),
                 "zalo": data.get("zalo", "0879072010"),
                 "createdAt": datetime.now().isoformat(),
                 "isActive": True,
-                "keyQuota": data.get("keyQuota", 50),
+                "keyQuota": int(data.get("keyQuota", 50)),
                 "keysUsed": 0
             }
             DB["admins"].append(new_admin)
+            
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "success": True,
+                "admin": new_admin,
+                "message": f"✅ Admin {username} created successfully!"
+            }).encode())
+            return
+        
+        # ===== API MASTER DELETE ADMIN =====
+        if path == "/api/master-delete-admin":
+            master_user = data.get("master_username", "")
+            master_pass = data.get("master_password", "")
+            if master_user != MASTER_USERNAME or master_pass != MASTER_PASSWORD:
+                self.send_response(401)
+                self.end_headers()
+                return
+            
+            username = data.get("username", "")
+            DB["admins"] = [a for a in DB["admins"] if a["username"] != username]
+            DB["keys"] = [k for k in DB["keys"] if k["createdBy"] != username]
+            
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True}).encode())
+            return
+        
+        # ===== API MASTER UPDATE QUOTA =====
+        if path == "/api/master-update-quota":
+            master_user = data.get("master_username", "")
+            master_pass = data.get("master_password", "")
+            if master_user != MASTER_USERNAME or master_pass != MASTER_PASSWORD:
+                self.send_response(401)
+                self.end_headers()
+                return
+            
+            username = data.get("username", "")
+            new_quota = int(data.get("newQuota", 50))
+            
+            for admin in DB["admins"]:
+                if admin["username"] == username:
+                    admin["keyQuota"] = new_quota
+                    break
+            
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
