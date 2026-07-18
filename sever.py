@@ -3,12 +3,11 @@ import json
 import urllib.parse
 import os
 import time
-import re
 from datetime import datetime, timedelta
 import uuid
 
 # ============================================================
-# 🔒 THÔNG TIN MASTER
+# THÔNG TIN MASTER
 # ============================================================
 MASTER_USERNAME = "nguyenduclam"
 MASTER_PASSWORD = "ngduclamcute1201"
@@ -23,10 +22,48 @@ DB = {
 }
 
 # ============================================================
+# HÀM XỬ LÝ ADMIN
+# ============================================================
+def find_admin(username):
+    for a in DB["admins"]:
+        if a["username"] == username:
+            return a
+    return None
+
+def admin_login_check(username, password, ip):
+    """Kiểm tra đăng nhập admin + IP lock"""
+    admin = find_admin(username)
+    if not admin:
+        return {"success": False, "error": "Admin not found!"}
+    if admin["password"] != password:
+        return {"success": False, "error": "Invalid password!"}
+    if not admin.get("isActive", True):
+        return {"success": False, "error": "Account is locked!"}
+    
+    # 🔥 KIỂM TRA IP LOCK
+    registered_ip = admin.get("registered_ip")
+    if registered_ip and registered_ip != ip:
+        return {
+            "success": False, 
+            "error": f"IP not allowed! This account is locked to IP: {registered_ip}"
+        }
+    
+    # Lần đầu đăng nhập -> lưu IP
+    if not registered_ip:
+        admin["registered_ip"] = ip
+        for i, a in enumerate(DB["admins"]):
+            if a["username"] == username:
+                DB["admins"][i]["registered_ip"] = ip
+                break
+    
+    admin["last_login"] = datetime.now().isoformat()
+    return {"success": True, "admin": admin}
+
+# ============================================================
 # HÀM XỬ LÝ KEY
 # ============================================================
 def create_key(package, expires_days, max_devices, features, custom_dns, admin_username):
-    admin = next((a for a in DB["admins"] if a["username"] == admin_username), None)
+    admin = find_admin(admin_username)
     if not admin:
         return {"success": False, "error": "Admin not found!"}
     if admin["keysUsed"] >= admin["keyQuota"]:
@@ -57,7 +94,12 @@ def create_key(package, expires_days, max_devices, features, custom_dns, admin_u
     return {"success": True, "key": new_key}
 
 def validate_key(key_code):
-    key = next((k for k in DB["keys"] if k["keyCode"] == key_code), None)
+    key = None
+    for k in DB["keys"]:
+        if k["keyCode"] == key_code:
+            key = k
+            break
+    
     if not key:
         return {"valid": False, "error": "Key not found!"}
     if not key["isActive"]:
@@ -69,13 +111,20 @@ def validate_key(key_code):
     return {"valid": True, "key": key}
 
 def use_key(key_code, udid, ip):
-    key = next((k for k in DB["keys"] if k["keyCode"] == key_code), None)
+    key = None
+    for k in DB["keys"]:
+        if k["keyCode"] == key_code:
+            key = k
+            break
+    
     if not key:
         return {"success": False, "error": "Key not found!"}
-    if any(d["udid"] == udid for d in key["usedDevices"]):
-        return {"success": False, "error": "UDID already registered!"}
     if len(key["usedDevices"]) >= key["maxDevices"]:
         return {"success": False, "error": "Key reached max devices!"}
+    
+    for d in key["usedDevices"]:
+        if d["udid"] == udid:
+            return {"success": False, "error": "UDID already registered!"}
     
     key["usedDevices"].append({
         "udid": udid,
@@ -85,14 +134,19 @@ def use_key(key_code, udid, ip):
     return {"success": True}
 
 def delete_key(key_code, admin_username):
-    key = next((k for k in DB["keys"] if k["keyCode"] == key_code), None)
+    key = None
+    for k in DB["keys"]:
+        if k["keyCode"] == key_code:
+            key = k
+            break
+    
     if not key:
         return {"success": False, "error": "Key not found!"}
     if key["createdBy"] != admin_username:
         return {"success": False, "error": "You can only delete your own keys!"}
     
     DB["keys"] = [k for k in DB["keys"] if k["keyCode"] != key_code]
-    admin = next((a for a in DB["admins"] if a["username"] == admin_username), None)
+    admin = find_admin(admin_username)
     if admin:
         admin["keysUsed"] = max(0, admin["keysUsed"] - 1)
     return {"success": True}
@@ -133,7 +187,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.battery</string>
         <key>PayloadDisplayName</key>
-        <string>Battery Optimize</string>
+        <string>🔋 Battery Optimize</string>
         <key>PayloadContent</key>
         <dict>
             <key>BackgroundAppRefresh</key>
@@ -149,7 +203,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.update</string>
         <key>PayloadDisplayName</key>
-        <string>FPS Boost</string>
+        <string>⚡ FPS Boost</string>
         <key>AutomaticDownload</key>
         <false/>
         <key>AutomaticAppInstallation</key>
@@ -165,7 +219,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.dns</string>
         <key>PayloadDisplayName</key>
-        <string>DNS Optimizer</string>
+        <string>🌐 DNS Optimizer</string>
         <key>DNSSettings</key>
         <dict>
             <key>DNSAddresses</key>
@@ -186,7 +240,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.adblock</string>
         <key>PayloadDisplayName</key>
-        <string>Ad Blocker</string>
+        <string>🚫 Ad Blocker</string>
         <key>FilterWhitelist</key>
         <array>
             <string>*.garena.com</string>
@@ -202,7 +256,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.wifi</string>
         <key>PayloadDisplayName</key>
-        <string>Wi-Fi 5GHz</string>
+        <string>📶 Wi-Fi 5GHz</string>
         <key>PreferredNetworks</key>
         <array>
             <dict>
@@ -222,7 +276,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.ram</string>
         <key>PayloadDisplayName</key>
-        <string>RAM Optimizer</string>
+        <string>🧹 RAM Optimizer</string>
         <key>PayloadContent</key>
         <dict>
             <key>Note</key>
@@ -238,7 +292,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.cache</string>
         <key>PayloadDisplayName</key>
-        <string>Cache Cleaner</string>
+        <string>🗑️ Cache Cleaner</string>
         <key>PayloadContent</key>
         <dict>
             <key>Note</key>
@@ -254,7 +308,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.aimlock</string>
         <key>PayloadDisplayName</key>
-        <string>Head Track</string>
+        <string>🎯 Head Track</string>
         <key>PayloadContent</key>
         <string><![CDATA[
 <AimLockConfig>
@@ -303,7 +357,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.recoil</string>
         <key>PayloadDisplayName</key>
-        <string>Fix Recoil</string>
+        <string>🔫 Fix Recoil</string>
         <key>PayloadContent</key>
         <string><![CDATA[
 <RecoilConfig>
@@ -323,7 +377,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.lightscope</string>
         <key>PayloadDisplayName</key>
-        <string>Light Scope</string>
+        <string>⚖️ Light Scope</string>
         <key>PayloadContent</key>
         <string><![CDATA[
 <LightScopeConfig>
@@ -342,7 +396,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.bodytrack</string>
         <key>PayloadDisplayName</key>
-        <string>Body Track</string>
+        <string>🎯 Body Track</string>
         <key>PayloadContent</key>
         <string><![CDATA[
 <CenterCutSim>
@@ -381,7 +435,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.info</string>
         <key>PayloadDisplayName</key>
-        <string>License Info</string>
+        <string>ℹ️ License Info</string>
         <key>PayloadContent</key>
         <dict>
             <key>UDID</key>
@@ -408,33 +462,10 @@ def generate_mobile_config(key_data, udid):
 # ============================================================
 class MyHandler(SimpleHTTPRequestHandler):
     
-    PROTECTED_FILES = [
-        'x7k9m2p4.html',
-        'q8w5e3r1.html'
-    ]
-    
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         query = urllib.parse.parse_qs(parsed.query)
-        
-        for protected in self.PROTECTED_FILES:
-            if path.endswith(protected):
-                self.send_response(403)
-                self.send_header("Content-Type", "text/html")
-                self.end_headers()
-                self.wfile.write("""
-                <!DOCTYPE html>
-                <html>
-                <head><title>403 Forbidden</title></head>
-                <body style="text-align:center;font-family:sans-serif;padding:50px;background:#0a0a12;color:#e0e0e0;">
-                    <h1>403 Forbidden</h1>
-                    <p>Access denied.</p>
-                    <p><a href="/" style="color:#7b61ff;text-decoration:none;">Back to home</a></p>
-                </body>
-                </html>
-                """.encode())
-                return
         
         if path == "/api/validate":
             key = query.get("key", [""])[0]
@@ -452,7 +483,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 return
             username = auth.replace("Bearer ", "")
-            admin = next((a for a in DB["admins"] if a["username"] == username), None)
+            admin = find_admin(username)
             if not admin:
                 self.send_response(403)
                 self.end_headers()
@@ -506,20 +537,30 @@ class MyHandler(SimpleHTTPRequestHandler):
         except:
             data = {}
         
+        # 🔥 Admin Login (có IP Lock)
         if path == "/api/admin-login":
             username = data.get("username", "")
             password = data.get("password", "")
-            admin = next((a for a in DB["admins"] if a["username"] == username and a["password"] == password), None)
-            if admin and admin["isActive"]:
+            ip = self.client_address[0]
+            
+            result = admin_login_check(username, password, ip)
+            if result["success"]:
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write(json.dumps({"success": True, "username": username}).encode())
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "username": username,
+                    "ip": ip
+                }).encode())
             else:
                 self.send_response(401)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
+                self.wfile.write(json.dumps({
+                    "success": False,
+                    "error": result["error"]
+                }).encode())
             return
         
         if path == "/api/master-login":
@@ -544,8 +585,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 return
             username = auth.replace("Bearer ", "")
-            admin = next((a for a in DB["admins"] if a["username"] == username), None)
-            if not admin or not admin["isActive"]:
+            admin = find_admin(username)
+            if not admin or not admin.get("isActive", True):
                 self.send_response(403)
                 self.end_headers()
                 return
@@ -586,12 +627,16 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.client_address[0]
             )
             if result["success"]:
-                key_data = next((k for k in DB["keys"] if k["keyCode"] == data.get("keyCode")), None)
+                key_data = None
+                for k in DB["keys"]:
+                    if k["keyCode"] == data.get("keyCode"):
+                        key_data = k
+                        break
                 if key_data:
                     xml = generate_mobile_config(key_data, data.get("udid", ""))
                     self.send_response(200)
                     self.send_header("Content-Type", "application/x-apple-aspen-config")
-                    self.send_header("Content-Disposition", "attachment; filename=Configplist_OptiSystem.mobileconfig")
+                    self.send_header("Content-Disposition", "attachment; filename=Configplist OptiSystem.mobileconfig")
                     self.end_headers()
                     self.wfile.write(xml.encode())
                     return
@@ -620,7 +665,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"success": False, "error": "Username is required!"}).encode())
                 return
             
-            if any(a["username"] == username for a in DB["admins"]):
+            if find_admin(username):
                 self.send_response(400)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
@@ -635,7 +680,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                 "createdAt": datetime.now().isoformat(),
                 "isActive": True,
                 "keyQuota": int(data.get("keyQuota", 50)),
-                "keysUsed": 0
+                "keysUsed": 0,
+                "registered_ip": None
             }
             DB["admins"].append(new_admin)
             
@@ -699,4 +745,5 @@ if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", port), MyHandler)
     print(f"Server running at http://0.0.0.0:{port}")
     print(f"Master: {MASTER_USERNAME}")
+    print("✅ Each admin can only login from 1 IP (locked on first login)")
     server.serve_forever()
