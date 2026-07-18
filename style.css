@@ -1,213 +1,565 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Panel 🧩</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container" id="app">
-        <div class="header">
-            <div class="icon">👑</div>
-            <h1>Master Panel</h1>
-            <div class="sub">Configuration Centre</div>
-        </div>
+/* ============================================================
+   NEON EDITION - Configuration Centre
+   ============================================================ */
 
-        <!-- LOGIN -->
-        <div id="login-box">
-            <div class="form-group">
-                <label>🔑 Mật khẩu Master</label>
-                <input type="password" id="masterPass" placeholder="Nhập mật khẩu master..." onkeydown="if(event.key==='Enter') masterLogin()">
-            </div>
-            <button class="btn" onclick="masterLogin()">Đăng nhập →</button>
-            <div id="loginMsg" class="msg"></div>
-        </div>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        <!-- DASHBOARD -->
-        <div id="dashboard" class="hidden">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <span style="font-size:14px;color:#aaa;">📦 Tổng admin: <strong id="totalAdmins" style="color:#00d4ff;">0</strong></span>
-                <span style="font-size:14px;color:#aaa;">🔑 Tổng key: <strong id="totalKeys" style="color:#00d4ff;">0</strong></span>
-            </div>
+body {
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0a12;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-image: 
+        radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse at 80% 50%, rgba(123, 97, 255, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(0, 212, 255, 0.03) 0%, transparent 60%);
+}
 
-            <!-- Tạo admin con -->
-            <div style="border-top:1px solid #2a2a3c;padding-top:16px;">
-                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">➕ Tạo Admin Con</h2>
+/* ===== CONTAINER ===== */
+.container {
+    max-width: 560px;
+    width: 100%;
+    background: rgba(10, 10, 18, 0.85);
+    border-radius: 32px;
+    padding: 34px 28px;
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    box-shadow: 
+        0 0 40px rgba(0, 212, 255, 0.03),
+        0 0 80px rgba(123, 97, 255, 0.02),
+        inset 0 0 40px rgba(0, 212, 255, 0.02);
+    backdrop-filter: blur(12px);
+    transition: 0.4s;
+}
 
-                <div class="form-group">
-                    <label>👤 Tên đăng nhập</label>
-                    <input type="text" id="adminUsername" placeholder="VD: admin2">
-                </div>
-                <div class="form-group">
-                    <label>🔑 Mật khẩu</label>
-                    <input type="text" id="adminPassword" placeholder="Mật khẩu admin con">
-                </div>
-                <div class="form-group">
-                    <label>📛 Tên hiển thị</label>
-                    <input type="text" id="adminDisplayName" placeholder="VD: Quản Trị Viên 2">
-                </div>
-                <div class="form-group">
-                    <label>📱 Zalo</label>
-                    <input type="text" id="adminZalo" placeholder="VD: 0879072010" value="0879072010">
-                </div>
-                <div class="form-group">
-                    <label>📦 Quota key</label>
-                    <input type="number" id="adminQuota" value="50" min="1">
-                </div>
+.container:hover {
+    border-color: rgba(0, 212, 255, 0.30);
+    box-shadow: 
+        0 0 60px rgba(0, 212, 255, 0.06),
+        0 0 120px rgba(123, 97, 255, 0.04);
+}
 
-                <button class="btn" onclick="createAdmin()">Tạo admin →</button>
-                <div id="createMsg" class="msg"></div>
-            </div>
+/* ===== NEON HEADER ===== */
+.header {
+    text-align: center;
+    margin-bottom: 28px;
+}
 
-            <!-- Danh sách admin con -->
-            <div class="key-list">
-                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">📋 Danh sách Admin</h2>
-                <div id="adminList"></div>
-            </div>
+.header .icon {
+    font-size: 48px;
+    margin-bottom: 4px;
+    animation: pulseGlow 2.5s ease-in-out infinite;
+}
 
-            <div style="margin-top:16px;text-align:center;">
-                <a href="#" onclick="masterLogout(); return false;" style="color:#555;font-size:13px;text-decoration:none;">🚪 Đăng xuất</a>
-            </div>
-        </div>
-    </div>
+.header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #00d4ff, #7b61ff, #00d4ff);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradShift 4s ease-in-out infinite;
+    letter-spacing: -0.5px;
+    text-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
+}
 
-    <script src="script.js"></script>
-    <script>
-        // ============================================================
-        // MASTER LOGIC
-        // ============================================================
+.header .sub {
+    font-size: 12px;
+    color: rgba(0, 212, 255, 0.35);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 2px;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.08);
+}
 
-        function masterLogin() {
-            const pass = document.getElementById('masterPass').value.trim();
-            const msg = document.getElementById('loginMsg');
+@keyframes gradShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
 
-            if (pass === MASTER_PASSWORD) {
-                document.getElementById('login-box').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                msg.className = 'msg';
-                msg.textContent = '';
-                renderAdminList();
-                updateStats();
-            } else {
-                msg.className = 'msg error';
-                msg.textContent = '❌ Sai mật khẩu master!';
-            }
-        }
+@keyframes pulseGlow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+}
 
-        function masterLogout() {
-            document.getElementById('login-box').classList.remove('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('masterPass').value = '';
-        }
+/* ===== NEON NAVBAR ===== */
+.navbar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding: 4px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
 
-        function createAdmin() {
-            const username = document.getElementById('adminUsername').value.trim();
-            const password = document.getElementById('adminPassword').value.trim();
-            const displayName = document.getElementById('adminDisplayName').value.trim();
-            const zalo = document.getElementById('adminZalo').value.trim();
-            const quota = parseInt(document.getElementById('adminQuota').value) || 50;
-            const msg = document.getElementById('createMsg');
+.navbar a {
+    color: rgba(255, 255, 255, 0.25);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    position: relative;
+}
 
-            if (!username || !password) {
-                msg.className = 'msg error';
-                msg.textContent = '⚠️ Vui lòng nhập đầy đủ thông tin!';
-                return;
-            }
+.navbar a:hover {
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.04);
+}
 
-            const result = createAdmin(username, password, displayName || username, zalo || '0879072010', quota);
+.navbar a.active {
+    color: #00d4ff;
+    background: rgba(0, 212, 255, 0.08);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.08), inset 0 0 20px rgba(0, 212, 255, 0.03);
+    border: 1px solid rgba(0, 212, 255, 0.15);
+}
 
-            if (!result.success) {
-                msg.className = 'msg error';
-                msg.textContent = '❌ ' + result.error;
-                return;
-            }
+/* ===== FORM ===== */
+.form-group {
+    margin-bottom: 16px;
+}
 
-            msg.className = 'msg success';
-            msg.textContent = `✅ Tạo admin thành công!\n👤 ${username} | Quota: ${quota} key`;
+label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
 
-            renderAdminList();
-            updateStats();
+input, select, textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    font-size: 15px;
+    color: #e0e0e0;
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
 
-            document.getElementById('adminUsername').value = '';
-            document.getElementById('adminPassword').value = '';
-            document.getElementById('adminDisplayName').value = '';
-            document.getElementById('adminZalo').value = '0879072010';
-            document.getElementById('adminQuota').value = '50';
-        }
+input:focus, select:focus, textarea:focus {
+    border-color: #7b61ff;
+    background: rgba(123, 97, 255, 0.05);
+    box-shadow: 0 0 25px rgba(123, 97, 255, 0.08), inset 0 0 25px rgba(123, 97, 255, 0.02);
+}
 
-        function renderAdminList() {
-            const data = loadDB();
-            const admins = data.admins;
-            const container = document.getElementById('adminList');
+input::placeholder, textarea::placeholder {
+    color: rgba(255, 255, 255, 0.15);
+}
 
-            if (admins.length === 0) {
-                container.innerHTML = '<div style="color:#555;text-align:center;padding:20px;">Chưa có admin nào</div>';
-                return;
-            }
+/* ===== BUTTONS ===== */
+.btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #00d4ff, #7b61ff);
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
 
-            let html = '';
-            admins.forEach(a => {
-                const statusClass = a.isActive ? '' : 'inactive';
-                const statusText = a.isActive ? '🟢 Hoạt động' : '🔴 Đã khóa';
+.btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
 
-                html += `
-                <div class="admin-item">
-                    <div>
-                        <div class="name">${a.displayName || a.username}</div>
-                        <div style="font-size:11px;color:#666;">
-                            ${a.username} · ${a.keysUsed}/${a.keyQuota} key
-                            · Zalo: ${a.zalo || 'Chưa có'}
-                        </div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span class="badge ${statusClass}">${statusText}</span>
-                        <div class="actions">
-                            <button onclick="editAdmin('${a.username}')" title="Sửa quota" style="color:#00d4ff;">✏️</button>
-                            <button class="del" onclick="deleteAdmin('${a.username}')" title="Xóa admin">🗑️</button>
-                        </div>
-                    </div>
-                </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
+.btn:hover::before {
+    opacity: 1;
+}
 
-        function editAdmin(username) {
-            const newQuota = prompt(`Nhập quota mới cho admin ${username}:`);
-            if (newQuota !== null) {
-                const quota = parseInt(newQuota);
-                if (!isNaN(quota) && quota > 0) {
-                    const result = updateAdminQuota(username, quota);
-                    if (result) {
-                        renderAdminList();
-                        updateStats();
-                        alert('✅ Cập nhật quota thành công!');
-                    } else {
-                        alert('❌ Không tìm thấy admin!');
-                    }
-                } else {
-                    alert('⚠️ Vui lòng nhập số hợp lệ!');
-                }
-            }
-        }
+.btn:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 10px 40px rgba(123, 97, 255, 0.30), 0 0 60px rgba(0, 212, 255, 0.10);
+}
 
-        function deleteAdmin(username) {
-            if (confirm(`Xóa admin ${username}? (Tất cả key của admin này cũng sẽ bị xóa)`)) {
-                const data = loadDB();
-                data.keys = data.keys.filter(k => k.createdBy !== username);
-                deleteAdmin(username);
-                saveDB(data);
-                renderAdminList();
-                updateStats();
-            }
-        }
+.btn:active {
+    transform: scale(0.98);
+}
 
-        function updateStats() {
-            const data = loadDB();
-            document.getElementById('totalAdmins').textContent = data.admins.length;
-            document.getElementById('totalKeys').textContent = data.keys.length;
-        }
-    </script>
-</body>
-</html>
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 5px 20px rgba(255, 255, 255, 0.05);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4757, #ff6b81);
+}
+
+.btn-danger:hover {
+    box-shadow: 0 10px 40px rgba(255, 71, 87, 0.30);
+}
+
+/* ===== MESSAGES ===== */
+.msg {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-top: 12px;
+    display: none;
+    border: 1px solid transparent;
+}
+
+.msg.error {
+    display: block;
+    background: rgba(255, 71, 87, 0.10);
+    color: #ff6b81;
+    border-color: rgba(255, 71, 87, 0.15);
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.05);
+}
+
+.msg.success {
+    display: block;
+    background: rgba(0, 212, 255, 0.08);
+    color: #00d4ff;
+    border-color: rgba(0, 212, 255, 0.12);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.05);
+}
+
+.hidden { display: none; }
+
+/* ===== INFO BOX ===== */
+.info-box {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 12px 0;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.info-box .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 4px 0;
+}
+
+.info-box .row .label {
+    color: rgba(255, 255, 255, 0.30);
+    text-transform: none;
+    font-size: 13px;
+    letter-spacing: 0;
+}
+
+.info-box .row .value {
+    color: #e0e0e0;
+    font-weight: 600;
+}
+
+/* ===== FEATURES ===== */
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    margin-bottom: 4px;
+    font-size: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.feature-item .icon {
+    font-size: 16px;
+}
+
+/* ===== FEATURE GRID (Admin) ===== */
+.feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 8px 0 12px;
+}
+
+.feature-grid label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.feature-grid label:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.feature-grid label:has(input:checked) {
+    background: rgba(0, 212, 255, 0.05);
+    border-color: rgba(0, 212, 255, 0.12);
+    color: #00d4ff;
+}
+
+.feature-grid input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #7b61ff;
+    background: transparent;
+    padding: 0;
+    width: 16px;
+}
+
+.feature-grid input[type="checkbox"]:focus {
+    box-shadow: none;
+}
+
+/* ===== QUOTA ===== */
+.quota {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.quota .used {
+    color: #00d4ff;
+    font-weight: 700;
+}
+
+.quota .total {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== KEY LIST ===== */
+.key-list {
+    margin-top: 20px;
+}
+
+.key-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: 0.3s;
+}
+
+.key-item:hover {
+    border-color: rgba(0, 212, 255, 0.10);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.key-item .code {
+    font-weight: 600;
+    font-family: monospace;
+    color: #00d4ff;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.10);
+}
+
+.key-item .status {
+    font-size: 11px;
+    padding: 2px 12px;
+    border-radius: 20px;
+}
+
+.key-item .status.active {
+    background: rgba(0, 212, 255, 0.10);
+    color: #00d4ff;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.05);
+}
+
+.key-item .status.expired {
+    background: rgba(255, 71, 87, 0.10);
+    color: #ff6b81;
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.05);
+}
+
+.key-item .delete-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 71, 87, 0.4);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.key-item .delete-btn:hover {
+    color: #ff6b81;
+    background: rgba(255, 71, 87, 0.08);
+}
+
+/* ===== ADMIN LIST ===== */
+.admin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    margin-bottom: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: 0.3s;
+}
+
+.admin-item:hover {
+    border-color: rgba(212, 0, 255, 0.10);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-item .name {
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+.admin-item .badge {
+    font-size: 11px;
+    padding: 2px 12px;
+    border-radius: 20px;
+    background: rgba(0, 212, 255, 0.08);
+    color: #00d4ff;
+}
+
+.admin-item .badge.inactive {
+    background: rgba(255, 71, 87, 0.08);
+    color: #ff6b81;
+}
+
+.admin-item .actions {
+    display: flex;
+    gap: 4px;
+}
+
+.admin-item .actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: 0.3s;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.admin-item .actions button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e0e0e0;
+}
+
+.admin-item .actions .del:hover {
+    color: #ff6b81;
+    background: rgba(255, 71, 87, 0.08);
+}
+
+/* ===== ADMIN CONTACT ===== */
+.admin-contact {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    font-size: 13px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.30);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.admin-contact a {
+    color: #00d4ff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.admin-contact a:hover {
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.20);
+}
+
+.admin-contact strong {
+    color: #e0e0e0;
+}
+
+/* ===== BRAND ===== */
+.brand {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.06);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 212, 255, 0.20);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 212, 255, 0.30);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px 16px;
+        border-radius: 20px;
+    }
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+    .header h1 {
+        font-size: 22px;
+    }
+    .navbar a {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+}
