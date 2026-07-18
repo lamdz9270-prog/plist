@@ -3,244 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuration Centre 🧩</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a12;
-            color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 520px;
-            width: 100%;
-            background: rgba(18, 18, 30, 0.85);
-            border-radius: 28px;
-            padding: 34px 28px;
-            border: 1px solid rgba(0, 212, 255, 0.15);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-        }
-        .header { text-align: center; margin-bottom: 28px; }
-        .header .icon { font-size: 44px; margin-bottom: 4px; }
-        .header h1 {
-            font-size: 26px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #00d4ff, #7b61ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .header .sub {
-            font-size: 12px;
-            color: rgba(255,255,255,0.3);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-        .navbar {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-        .navbar a {
-            color: rgba(255,255,255,0.3);
-            text-decoration: none;
-            font-size: 13px;
-            padding: 6px 16px;
-            border-radius: 20px;
-            transition: 0.3s;
-            border: 1px solid transparent;
-        }
-        .navbar a:hover {
-            color: #e0e0e0;
-            border-color: rgba(255,255,255,0.1);
-        }
-        .navbar a.active {
-            color: #00d4ff;
-            border-color: rgba(0, 212, 255, 0.3);
-            background: rgba(0, 212, 255, 0.05);
-        }
-        .form-group { margin-bottom: 16px; }
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 12px 14px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            font-size: 15px;
-            color: #e0e0e0;
-            outline: none;
-            transition: 0.3s;
-            font-family: inherit;
-        }
-        input:focus {
-            border-color: #7b61ff;
-            box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.1);
-        }
-        input::placeholder {
-            color: rgba(255,255,255,0.2);
-        }
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #00d4ff, #7b61ff);
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #fff;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(123, 97, 255, 0.3);
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.08);
-        }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.15);
-            box-shadow: none;
-        }
-        .msg {
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            margin-top: 12px;
-            display: none;
-        }
-        .msg.error {
-            display: block;
-            background: rgba(255, 71, 87, 0.15);
-            color: #ff6b81;
-            border: 1px solid rgba(255, 71, 87, 0.2);
-        }
-        .msg.success {
-            display: block;
-            background: rgba(0, 212, 255, 0.1);
-            color: #00d4ff;
-            border: 1px solid rgba(0, 212, 255, 0.15);
-        }
-        .hidden { display: none; }
-        .info-box {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 12px 0;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .info-box .row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            padding: 4px 0;
-        }
-        .info-box .row .label { color: rgba(255,255,255,0.3); }
-        .info-box .row .value { color: #e0e0e0; font-weight: 600; }
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 8px;
-            margin-bottom: 4px;
-            font-size: 13px;
-        }
-        .feature-item .icon { font-size: 16px; }
-        .admin-contact {
-            margin-top: 16px;
-            padding: 12px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 10px;
-            font-size: 13px;
-            text-align: center;
-            color: rgba(255,255,255,0.4);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .admin-contact a {
-            color: #00d4ff;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .brand {
-            text-align: center;
-            color: rgba(255,255,255,0.1);
-            font-size: 11px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: 20px;
-        }
-        @media (max-width: 480px) {
-            .container { padding: 20px 16px; }
-        }
-    </style>
+    <title>Configplist OptiSystem⚡️</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container" id="app">
         <div class="header">
-            <div class="icon">🧩</div>
-            <h1>Configuration Centre</h1>
+            <div class="icon">⚡️</div>
+            <h1>Configplist OptiSystem⚡️</h1>
             <div class="sub">DUCLAM.NET</div>
         </div>
 
-        <div class="navbar">
-            <a href="/index.html" class="active">🔑 User</a>
-            <a href="/x7k9m2p4.html">👑 Admin</a>
-            <a href="/q8w5e3r1.html">👑 Master</a>
-        </div>
-
-        <!-- STEP 1: NHẬP KEY -->
         <div id="step-key">
             <div class="form-group">
-                <label>🔑 License Key</label>
+                <label>License Key</label>
                 <input type="text" id="keyInput" placeholder="VD: VIP20260717-A1B2C3D4-001" onkeydown="if(event.key==='Enter') validateKey()">
             </div>
-            <button class="btn" onclick="validateKey()" id="btnCheck">Kiểm tra key →</button>
+            <button class="btn" onclick="validateKey()" id="btnCheck">Check Key</button>
             <div id="msg" class="msg"></div>
         </div>
 
-        <!-- STEP 2: THÔNG TIN + UDID -->
         <div id="step-udid" class="hidden">
             <div class="info-box">
-                <div class="row"><span class="label">🔑 Key</span><span class="value" id="displayKey">---</span></div>
-                <div class="row"><span class="label">⏳ Hết hạn</span><span class="value" id="displayExpiry">---</span></div>
-                <div class="row"><span class="label">📱 Thiết bị</span><span class="value" id="displayDevice">0 / 0</span></div>
+                <div class="row"><span class="label">Key</span><span class="value" id="displayKey">---</span></div>
+                <div class="row"><span class="label">Expires</span><span class="value" id="displayExpiry">---</span></div>
+                <div class="row"><span class="label">Devices</span><span class="value" id="displayDevice">0 / 0</span></div>
             </div>
 
-            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:12px 0 4px;">📦 Chức năng</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:12px 0 4px;">Features</div>
             <div id="featureList"></div>
 
-            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:16px 0 4px;">📱 Nhập UDID</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:16px 0 4px;">Enter UDID</div>
             <div class="form-group">
                 <input type="text" id="udidInput" placeholder="VD: F2LQN1234567890ABCDEF" onkeydown="if(event.key==='Enter') generateConfig()">
             </div>
-            <button class="btn" onclick="generateConfig()" id="btnDownload">⬇️ Tải cấu hình</button>
+            <button class="btn" onclick="generateConfig()" id="btnDownload">Download Config</button>
 
             <div class="admin-contact">
-                👨‍💻 Admin: <strong id="adminName">Admin VIP</strong> · 
-                📱 Zalo: <a href="https://zalo.me/0879072010" target="_blank" id="adminZalo">0879072010</a>
+                Admin: <strong id="adminName">Admin</strong> · 
+                Zalo: <a href="https://zalo.me/0879072010" target="_blank" id="adminZalo">0879072010</a>
             </div>
             <div style="margin-top:10px;text-align:center;">
-                <a href="#" onclick="resetApp(); return false;" style="color:rgba(255,255,255,0.2);font-size:12px;text-decoration:none;">← Nhập key khác</a>
+                <a href="#" onclick="resetApp(); return false;" style="color:rgba(255,255,255,0.2);font-size:12px;text-decoration:none;">← Enter different key</a>
             </div>
         </div>
 
-        <div class="brand">CONFIGURATION CENTRE 🧩 · DUCLAM.NET</div>
+        <div class="brand">CONFIGPLIST OPTISYSTEM ⚡️ · DUCLAM.NET</div>
     </div>
 
     <script>
@@ -253,11 +61,11 @@
 
             if (!key) {
                 msg.className = 'msg error';
-                msg.textContent = '⚠️ Vui lòng nhập key';
+                msg.textContent = 'Please enter a key';
                 return;
             }
 
-            document.getElementById('btnCheck').textContent = '⏳ Đang kiểm tra...';
+            document.getElementById('btnCheck').textContent = 'Checking...';
             document.getElementById('btnCheck').disabled = true;
 
             fetch('/api/validate?key=' + encodeURIComponent(key))
@@ -265,8 +73,8 @@
                 .then(data => {
                     if (!data.valid) {
                         msg.className = 'msg error';
-                        msg.textContent = data.error || '❌ Key không hợp lệ';
-                        document.getElementById('btnCheck').textContent = 'Kiểm tra key →';
+                        msg.textContent = data.error || 'Invalid key';
+                        document.getElementById('btnCheck').textContent = 'Check Key';
                         document.getElementById('btnCheck').disabled = false;
                         return;
                     }
@@ -280,24 +88,24 @@
                     document.getElementById('displayKey').textContent = key;
                     document.getElementById('displayExpiry').textContent = new Date(data.key.expiresAt).toLocaleDateString('vi-VN');
                     document.getElementById('displayDevice').textContent = data.key.usedDevices.length + ' / ' + data.key.maxDevices;
-                    document.getElementById('adminName').textContent = data.key.adminInfo.name || 'Admin VIP';
+                    document.getElementById('adminName').textContent = data.key.adminInfo.name || 'Admin';
                     document.getElementById('adminZalo').textContent = data.key.adminInfo.zalo || '0879072010';
                     document.getElementById('adminZalo').href = 'https://zalo.me/' + (data.key.adminInfo.zalo || '0879072010');
 
                     const list = document.getElementById('featureList');
                     list.innerHTML = '';
                     const featureMap = {
-                        battery: '🔋 Tối ưu pin',
-                        fps_boost: '⚡ Buff FPS',
-                        reduce_lag: '🌐 Giảm lag',
-                        ad_block: '🚫 Chặn QC',
-                        network_optimize: '📶 Tối ưu mạng',
-                        ram_clean: '🧹 Dọn RAM',
-                        cache_clean: '🗑️ Xóa cache',
-                        head_track: '🎯 Bám đầu',
-                        fix_recoil: '🔫 Fix rung',
-                        light_scope: '⚖️ Nhẹ tâm',
-                        body_track: '🎯 Đầm tâm'
+                        battery: '🔋 Battery Optimize',
+                        fps_boost: '⚡ FPS Boost',
+                        reduce_lag: '🌐 DNS Optimizer',
+                        ad_block: '🚫 Ad Blocker',
+                        network_optimize: '📶 Wi-Fi 5GHz',
+                        ram_clean: '🧹 RAM Optimizer',
+                        cache_clean: '🗑️ Cache Cleaner',
+                        head_track: '🎯 Head Track',
+                        fix_recoil: '🔫 Fix Recoil',
+                        light_scope: '⚖️ Light Scope',
+                        body_track: '🎯 Body Track'
                     };
                     let has = false;
                     for (const [k, v] of Object.entries(featureMap)) {
@@ -307,18 +115,18 @@
                         }
                     }
                     if (!has) {
-                        list.innerHTML = `<div style="color:rgba(255,255,255,0.2);text-align:center;padding:10px;">📭 Không có chức năng</div>`;
+                        list.innerHTML = `<div style="color:rgba(255,255,255,0.2);text-align:center;padding:10px;">No features</div>`;
                     }
 
-                    document.getElementById('btnCheck').textContent = 'Kiểm tra key →';
+                    document.getElementById('btnCheck').textContent = 'Check Key';
                     document.getElementById('btnCheck').disabled = false;
                     msg.className = 'msg';
                     msg.textContent = '';
                 })
                 .catch(() => {
                     msg.className = 'msg error';
-                    msg.textContent = '❌ Lỗi kết nối server!';
-                    document.getElementById('btnCheck').textContent = 'Kiểm tra key →';
+                    msg.textContent = 'Connection error!';
+                    document.getElementById('btnCheck').textContent = 'Check Key';
                     document.getElementById('btnCheck').disabled = false;
                 });
         }
@@ -327,20 +135,20 @@
             const udid = document.getElementById('udidInput').value.trim();
 
             if (!udid) {
-                alert('⚠️ Vui lòng nhập UDID');
+                alert('Please enter UDID');
                 return;
             }
             if (!/^[0-9A-Fa-f]{40}$/.test(udid)) {
-                alert('⚠️ UDID không hợp lệ (phải 40 ký tự hex)');
+                alert('Invalid UDID (40 hex characters)');
                 return;
             }
 
             if (currentKeyData.usedDevices.find(d => d.udid === udid)) {
-                alert('⚠️ UDID này đã được đăng ký cho key này!');
+                alert('UDID already registered for this key!');
                 return;
             }
 
-            document.getElementById('btnDownload').textContent = '⏳ Đang tạo...';
+            document.getElementById('btnDownload').textContent = 'Generating...';
             document.getElementById('btnDownload').disabled = true;
 
             fetch('/api/use-key', {
@@ -352,27 +160,25 @@
                 if (res.status === 200) {
                     return res.blob();
                 }
-                return res.json().then(data => { throw new Error(data.error || 'Lỗi tạo file'); });
+                return res.json().then(data => { throw new Error(data.error || 'Error generating config'); });
             })
             .then(blob => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `Configplist OptiSystem⚡️.mobileconfig`;
+                a.download = 'Configplist OptiSystem.mobileconfig';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
 
-                document.getElementById('btnDownload').textContent = '⬇️ Tải cấu hình';
+                document.getElementById('btnDownload').textContent = 'Download Config';
                 document.getElementById('btnDownload').disabled = false;
-
-                // Reload key info
                 validateKey();
             })
             .catch(err => {
-                alert('❌ ' + err.message);
-                document.getElementById('btnDownload').textContent = '⬇️ Tải cấu hình';
+                alert('Error: ' + err.message);
+                document.getElementById('btnDownload').textContent = 'Download Config';
                 document.getElementById('btnDownload').disabled = false;
             });
         }
