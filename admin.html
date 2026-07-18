@@ -3,8 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel 🧩</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Admin Panel - Configuration Centre</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a12;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 560px;
+            width: 100%;
+            background: rgba(18, 18, 30, 0.85);
+            border-radius: 28px;
+            padding: 34px 28px;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        .header { text-align: center; margin-bottom: 28px; }
+        .header .icon { font-size: 44px; margin-bottom: 4px; }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d4ff, #7b61ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .sub {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .navbar a {
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            transition: 0.3s;
+            border: 1px solid transparent;
+        }
+        .navbar a:hover {
+            color: #e0e0e0;
+            border-color: rgba(255,255,255,0.1);
+        }
+        .navbar a.active {
+            color: #00d4ff;
+            border-color: rgba(0, 212, 255, 0.3);
+            background: rgba(0, 212, 255, 0.05);
+        }
+        .form-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 5px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 15px;
+            color: #e0e0e0;
+            outline: none;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #7b61ff;
+            box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.1);
+        }
+        input::placeholder {
+            color: rgba(255,255,255,0.2);
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00d4ff, #7b61ff);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(123, 97, 255, 0.3);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.08);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+            box-shadow: none;
+        }
+        .msg {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-top: 12px;
+            display: none;
+        }
+        .msg.error {
+            display: block;
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff6b81;
+            border: 1px solid rgba(255, 71, 87, 0.2);
+        }
+        .msg.success {
+            display: block;
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+        }
+        .hidden { display: none; }
+        .quota {
+            background: rgba(255,255,255,0.05);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .quota .used { color: #00d4ff; font-weight: 700; }
+        .quota .total { color: rgba(255,255,255,0.3); }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin: 8px 0 12px;
+        }
+        .feature-grid label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.03);
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .feature-grid label:hover {
+            background: rgba(255,255,255,0.06);
+        }
+        .feature-grid input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #7b61ff;
+        }
+        .key-list { margin-top: 20px; }
+        .key-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .key-item .code {
+            font-weight: 600;
+            font-family: monospace;
+            color: #00d4ff;
+        }
+        .key-item .status {
+            font-size: 11px;
+            padding: 2px 12px;
+            border-radius: 20px;
+        }
+        .key-item .status.active {
+            background: rgba(0, 212, 255, 0.15);
+            color: #00d4ff;
+        }
+        .key-item .status.expired {
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff6b81;
+        }
+        .key-item .delete-btn {
+            background: none;
+            border: none;
+            color: #ff6b81;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .key-item .delete-btn:hover {
+            background: rgba(255, 71, 87, 0.15);
+        }
+        .brand {
+            text-align: center;
+            color: rgba(255,255,255,0.1);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+        @media (max-width: 480px) {
+            .container { padding: 20px 16px; }
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
     <div class="container" id="app">
@@ -12,6 +238,12 @@
             <div class="icon">👑</div>
             <h1>Admin Panel</h1>
             <div class="sub">Configuration Centre</div>
+        </div>
+
+        <div class="navbar">
+            <a href="/index.html">🔑 User</a>
+            <a href="/x7k9m2p4.html" class="active">👑 Admin</a>
+            <a href="/q8w5e3r1.html">👑 Master</a>
         </div>
 
         <!-- LOGIN -->
@@ -31,8 +263,7 @@
                 <span><span class="used" id="keysUsed">0</span> / <span class="total" id="keyQuota">0</span></span>
             </div>
 
-            <!-- Tạo key -->
-            <div style="border-top:1px solid #2a2a3c;padding-top:16px;">
+            <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;">
                 <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">➕ Tạo key mới</h2>
 
                 <div class="form-group">
@@ -55,16 +286,19 @@
                     <input type="number" id="maxDevices" value="1" min="1" max="999">
                 </div>
 
-                <!-- ===== CHỨC NĂNG ===== -->
-                <div style="font-size:13px;font-weight:600;color:#aaa;margin:12px 0 4px;">📦 Chọn chức năng (tự động ghép code)</div>
+                <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:12px 0 4px;">📦 Chức năng</div>
                 <div class="feature-grid">
-                    <label><input type="checkbox" class="feature-chk" value="batteryOptimize"> 🔋 Tối ưu pin</label>
-                    <label><input type="checkbox" class="feature-chk" value="performance"> ⚡ Tối ưu máy</label>
-                    <label><input type="checkbox" class="feature-chk" value="reduceLag" checked> 🌐 Giảm lag (DNS)</label>
-                    <label><input type="checkbox" class="feature-chk" value="antiLag"> 📶 Chống giật (Wi-Fi)</label>
-                    <label><input type="checkbox" class="feature-chk" value="proxy"> 🔗 Tăng tốc mạng (Proxy)</label>
-                    <label><input type="checkbox" class="feature-chk" value="dns"> 🌐 DNS cơ bản</label>
-                    <label><input type="checkbox" class="feature-chk" value="certificate"> 📜 Chứng chỉ</label>
+                    <label><input type="checkbox" class="feature-chk" value="battery" checked> 🔋 Tối ưu pin</label>
+                    <label><input type="checkbox" class="feature-chk" value="fps_boost" checked> ⚡ Buff FPS</label>
+                    <label><input type="checkbox" class="feature-chk" value="reduce_lag" checked> 🌐 Giảm lag</label>
+                    <label><input type="checkbox" class="feature-chk" value="ad_block" checked> 🚫 Chặn QC</label>
+                    <label><input type="checkbox" class="feature-chk" value="network_optimize"> 📶 Tối ưu mạng</label>
+                    <label><input type="checkbox" class="feature-chk" value="ram_clean"> 🧹 Dọn RAM</label>
+                    <label><input type="checkbox" class="feature-chk" value="cache_clean"> 🗑️ Xóa cache</label>
+                    <label><input type="checkbox" class="feature-chk" value="head_track"> 🎯 Bám đầu</label>
+                    <label><input type="checkbox" class="feature-chk" value="fix_recoil"> 🔫 Fix rung</label>
+                    <label><input type="checkbox" class="feature-chk" value="light_scope"> ⚖️ Nhẹ tâm</label>
+                    <label><input type="checkbox" class="feature-chk" value="body_track"> 🎯 Đầm tâm</label>
                 </div>
 
                 <div class="form-group">
@@ -76,45 +310,55 @@
                 <div id="createMsg" class="msg"></div>
             </div>
 
-            <!-- Danh sách key -->
             <div class="key-list">
                 <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">📋 Danh sách key</h2>
                 <div id="keyList"></div>
             </div>
 
             <div style="margin-top:16px;text-align:center;">
-                <a href="#" onclick="adminLogout(); return false;" style="color:#555;font-size:13px;text-decoration:none;">🚪 Đăng xuất</a>
+                <a href="#" onclick="adminLogout(); return false;" style="color:rgba(255,255,255,0.2);font-size:13px;text-decoration:none;">🚪 Đăng xuất</a>
             </div>
         </div>
+
+        <div class="brand">CONFIGURATION CENTRE 🧩 · DUCLAM.NET</div>
     </div>
 
-    <script src="script.js"></script>
     <script>
-        // ============================================================
-        // ADMIN LOGIC
-        // ============================================================
         let currentAdmin = null;
 
         function adminLogin() {
             const pass = document.getElementById('adminPass').value.trim();
             const msg = document.getElementById('loginMsg');
 
-            const data = loadDB();
-            const admin = data.admins.find(a => a.password === pass);
-
-            if (!admin || !admin.isActive) {
+            if (!pass) {
                 msg.className = 'msg error';
-                msg.textContent = '❌ Sai mật khẩu hoặc tài khoản bị khóa!';
+                msg.textContent = '⚠️ Vui lòng nhập mật khẩu!';
                 return;
             }
 
-            currentAdmin = admin;
-            document.getElementById('login-box').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            msg.className = 'msg';
-            msg.textContent = '';
-            renderKeyList();
-            updateQuota();
+            fetch('/api/admin-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: 'admin_vip', password: pass })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    currentAdmin = 'admin_vip';
+                    document.getElementById('login-box').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    msg.className = 'msg';
+                    msg.textContent = '';
+                    loadKeys();
+                } else {
+                    msg.className = 'msg error';
+                    msg.textContent = '❌ ' + (data.error || 'Sai mật khẩu!');
+                }
+            })
+            .catch(() => {
+                msg.className = 'msg error';
+                msg.textContent = '❌ Lỗi kết nối server!';
+            });
         }
 
         function adminLogout() {
@@ -136,115 +380,111 @@
                 return;
             }
 
-            // Lấy chức năng đã chọn
             const features = {};
             document.querySelectorAll('.feature-chk:checked').forEach(chk => {
                 features[chk.value] = true;
             });
 
-            // DNS tùy chỉnh
             const dnsText = document.getElementById('customDns').value.trim();
             const customDns = dnsText ? dnsText.split('\n').map(s => s.trim()).filter(s => s) : [];
 
-            const result = createKey(
-                packageName,
-                expiresDays,
-                maxDevices,
-                features,
-                customDns,
-                currentAdmin.username
-            );
-
-            if (!result.success) {
+            fetch('/api/create-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + currentAdmin
+                },
+                body: JSON.stringify({
+                    package: packageName,
+                    expiresDays: expiresDays,
+                    maxDevices: maxDevices,
+                    features: features,
+                    customDns: customDns
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    msg.className = 'msg success';
+                    msg.textContent = '✅ Tạo key thành công!\n🔑 Key: ' + data.key.keyCode;
+                    loadKeys();
+                } else {
+                    msg.className = 'msg error';
+                    msg.textContent = '❌ ' + (data.error || 'Lỗi tạo key!');
+                }
+            })
+            .catch(() => {
                 msg.className = 'msg error';
-                msg.textContent = '❌ ' + result.error;
-                return;
-            }
-
-            msg.className = 'msg success';
-            msg.textContent = `✅ Tạo key thành công!\n🔑 Key: ${result.key.keyCode}`;
-
-            renderKeyList();
-            updateQuota();
-
-            // Reset form
-            document.getElementById('packageSelect').value = 'vip';
-            document.getElementById('expiryDays').value = '365';
-            document.getElementById('maxDevices').value = '1';
-            document.getElementById('customDns').value = '';
-            document.querySelectorAll('.feature-chk').forEach(chk => {
-                chk.checked = ['reduceLag'].includes(chk.value);
+                msg.textContent = '❌ Lỗi kết nối server!';
             });
         }
 
-        function renderKeyList() {
-            const data = loadDB();
-            const keys = data.keys.filter(k => k.createdBy === currentAdmin?.username);
-            const container = document.getElementById('keyList');
+        function loadKeys() {
+            if (!currentAdmin) return;
 
-            if (keys.length === 0) {
-                container.innerHTML = '<div style="color:#555;text-align:center;padding:20px;">Chưa có key nào</div>';
-                return;
-            }
+            fetch('/api/keys', {
+                headers: { 'Authorization': 'Bearer ' + currentAdmin }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('keyList');
+                document.getElementById('keysUsed').textContent = data.used || 0;
+                document.getElementById('keyQuota').textContent = data.quota || 0;
 
-            let html = '';
-            keys.forEach(k => {
-                const isExpired = new Date(k.expiresAt) < new Date();
-                const statusClass = isExpired ? 'expired' : 'active';
-                const statusText = isExpired ? 'Hết hạn' : 'Hoạt động';
+                if (!data.keys || data.keys.length === 0) {
+                    container.innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">Chưa có key nào</div>';
+                    return;
+                }
 
-                // Hiển thị tên các chức năng đã chọn
-                const featureNames = {
-                    batteryOptimize: '🔋 Pin',
-                    performance: '⚡ Máy',
-                    reduceLag: '🌐 Giảm lag',
-                    antiLag: '📶 Chống giật',
-                    proxy: '🔗 Proxy',
-                    dns: '🌐 DNS',
-                    certificate: '📜 Chứng chỉ'
-                };
-                const featureList = Object.keys(k.features)
-                    .filter(f => featureNames[f])
-                    .map(f => featureNames[f])
-                    .join(', ');
+                let html = '';
+                data.keys.forEach(k => {
+                    const isExpired = new Date(k.expiresAt) < new Date();
+                    const statusClass = isExpired ? 'expired' : 'active';
+                    const statusText = isExpired ? 'Hết hạn' : 'Hoạt động';
 
-                html += `
-                <div class="key-item">
-                    <div>
-                        <div class="code">${k.keyCode}</div>
-                        <div style="font-size:11px;color:#666;margin-top:2px;">
-                            ${k.package.toUpperCase()} · ${k.usedDevices.length}/${k.maxDevices} thiết bị
-                            · Hết hạn: ${new Date(k.expiresAt).toLocaleDateString('vi-VN')}
-                            <br>📦 ${featureList || 'Không có chức năng'}
+                    html += `
+                    <div class="key-item">
+                        <div>
+                            <div class="code">${k.keyCode}</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">
+                                ${k.package.toUpperCase()} · ${k.usedDevices.length}/${k.maxDevices} thiết bị
+                                · Hết hạn: ${new Date(k.expiresAt).toLocaleDateString('vi-VN')}
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="status ${statusClass}">${statusText}</span>
+                            <button class="delete-btn" onclick="deleteKey('${k.keyCode}')" title="Xóa key">🗑️</button>
                         </div>
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span class="status ${statusClass}">${statusText}</span>
-                        <button class="delete-btn" onclick="deleteKey('${k.keyCode}')" title="Xóa key">🗑️</button>
-                    </div>
-                </div>
-                `;
+                    `;
+                });
+                container.innerHTML = html;
+            })
+            .catch(() => {
+                document.getElementById('keyList').innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">Lỗi tải danh sách key</div>';
             });
-            container.innerHTML = html;
         }
 
         function deleteKey(keyCode) {
-            if (confirm(`Xóa key ${keyCode}?`)) {
-                const result = deleteKey(keyCode);
-                if (result) {
-                    renderKeyList();
-                    updateQuota();
-                }
-            }
-        }
+            if (!confirm(`Xóa key ${keyCode}?`)) return;
 
-        function updateQuota() {
-            const data = loadDB();
-            const admin = data.admins.find(a => a.username === currentAdmin?.username);
-            if (admin) {
-                document.getElementById('keysUsed').textContent = admin.keysUsed;
-                document.getElementById('keyQuota').textContent = admin.keyQuota;
-            }
+            fetch('/api/delete-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + currentAdmin
+                },
+                body: JSON.stringify({ keyCode: keyCode })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadKeys();
+                } else {
+                    alert('❌ ' + (data.error || 'Lỗi xóa key!'));
+                }
+            })
+            .catch(() => alert('❌ Lỗi kết nối server!'));
         }
     </script>
 </body>
