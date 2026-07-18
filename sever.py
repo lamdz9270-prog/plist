@@ -14,10 +14,10 @@ MASTER_USERNAME = "nguyenduclam"
 MASTER_PASSWORD = "ngduclamcute1201"
 
 # ============================================================
-# DATABASE (KHÔNG CÓ ADMIN MẶC ĐỊNH)
+# DATABASE
 # ============================================================
 DB = {
-    "admins": [],  # 👈 Master sẽ tạo admin con
+    "admins": [],
     "keys": [],
     "usageLogs": []
 }
@@ -125,7 +125,6 @@ def generate_mobile_config(key_data, udid):
     <key>PayloadContent</key>
     <array>'''
 
-    # 1️⃣ PIN
     if features.get("battery"):
         xml += '''
     <dict>
@@ -134,25 +133,14 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.battery</string>
         <key>PayloadDisplayName</key>
-        <string>🔋 Battery Optimize</string>
+        <string>Battery Optimize</string>
         <key>PayloadContent</key>
         <dict>
             <key>BackgroundAppRefresh</key>
             <false/>
         </dict>
-    </dict>
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.accessibility</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.reduce</string>
-        <key>PayloadDisplayName</key>
-        <string>🎨 Reduce Motion</string>
-        <key>ReduceMotion</key>
-        <true/>
     </dict>'''
 
-    # 2️⃣ FPS Boost
     if features.get("fps_boost"):
         xml += '''
     <dict>
@@ -161,24 +149,13 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.update</string>
         <key>PayloadDisplayName</key>
-        <string>⚡ FPS Boost</string>
+        <string>FPS Boost</string>
         <key>AutomaticDownload</key>
         <false/>
         <key>AutomaticAppInstallation</key>
         <false/>
-    </dict>
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.performance</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.performance</string>
-        <key>PayloadDisplayName</key>
-        <string>🚀 Performance Mode</string>
-        <key>HighPerformance</key>
-        <true/>
     </dict>'''
 
-    # 3️⃣ Reduce Lag
     if features.get("reduce_lag"):
         dns_list = features.get("customDns", ["1.1.1.1", "8.8.8.8"])
         xml += f'''
@@ -188,7 +165,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.dns</string>
         <key>PayloadDisplayName</key>
-        <string>🌐 DNS Optimizer</string>
+        <string>DNS Optimizer</string>
         <key>DNSSettings</key>
         <dict>
             <key>DNSAddresses</key>
@@ -201,7 +178,6 @@ def generate_mobile_config(key_data, udid):
         </dict>
     </dict>'''
 
-    # 4️⃣ Ad Block
     if features.get("ad_block"):
         xml += '''
     <dict>
@@ -210,7 +186,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.adblock</string>
         <key>PayloadDisplayName</key>
-        <string>🚫 Ad Blocker</string>
+        <string>Ad Blocker</string>
         <key>FilterWhitelist</key>
         <array>
             <string>*.garena.com</string>
@@ -218,7 +194,6 @@ def generate_mobile_config(key_data, udid):
         </array>
     </dict>'''
 
-    # 5️⃣ Network Optimize
     if features.get("network_optimize"):
         xml += '''
     <dict>
@@ -227,7 +202,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.wifi</string>
         <key>PayloadDisplayName</key>
-        <string>📶 Wi-Fi 5GHz</string>
+        <string>Wi-Fi 5GHz</string>
         <key>PreferredNetworks</key>
         <array>
             <dict>
@@ -237,19 +212,8 @@ def generate_mobile_config(key_data, udid):
                 <integer>5</integer>
             </dict>
         </array>
-    </dict>
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.network</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.network</string>
-        <key>PayloadDisplayName</key>
-        <string>⚡ Low Latency</string>
-        <key>LowLatency</key>
-        <true/>
     </dict>'''
 
-    # 6️⃣ RAM Clean
     if features.get("ram_clean"):
         xml += '''
     <dict>
@@ -258,7 +222,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.ram</string>
         <key>PayloadDisplayName</key>
-        <string>🧹 RAM Optimizer</string>
+        <string>RAM Optimizer</string>
         <key>PayloadContent</key>
         <dict>
             <key>Note</key>
@@ -266,7 +230,6 @@ def generate_mobile_config(key_data, udid):
         </dict>
     </dict>'''
 
-    # 7️⃣ Cache Clean
     if features.get("cache_clean"):
         xml += '''
     <dict>
@@ -275,7 +238,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.cache</string>
         <key>PayloadDisplayName</key>
-        <string>🗑️ Cache Cleaner</string>
+        <string>Cache Cleaner</string>
         <key>PayloadContent</key>
         <dict>
             <key>Note</key>
@@ -283,7 +246,6 @@ def generate_mobile_config(key_data, udid):
         </dict>
     </dict>'''
 
-    # 8️⃣ Head Track
     if features.get("head_track"):
         xml += '''
     <dict>
@@ -292,7 +254,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.aimlock</string>
         <key>PayloadDisplayName</key>
-        <string>🎯 Head Track</string>
+        <string>Head Track</string>
         <key>PayloadContent</key>
         <string><![CDATA[
 <AimLockConfig>
@@ -333,7 +295,6 @@ def generate_mobile_config(key_data, udid):
         ]]></string>
     </dict>'''
 
-    # 9️⃣ Fix Recoil
     if features.get("fix_recoil"):
         xml += '''
     <dict>
@@ -342,7 +303,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.recoil</string>
         <key>PayloadDisplayName</key>
-        <string>🔫 Fix Recoil</string>
+        <string>Fix Recoil</string>
         <key>PayloadContent</key>
         <string><![CDATA[
 <RecoilConfig>
@@ -354,7 +315,6 @@ def generate_mobile_config(key_data, udid):
         ]]></string>
     </dict>'''
 
-    # 🔟 Light Scope
     if features.get("light_scope"):
         xml += '''
     <dict>
@@ -363,7 +323,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.lightscope</string>
         <key>PayloadDisplayName</key>
-        <string>⚖️ Light Scope</string>
+        <string>Light Scope</string>
         <key>PayloadContent</key>
         <string><![CDATA[
 <LightScopeConfig>
@@ -374,7 +334,6 @@ def generate_mobile_config(key_data, udid):
         ]]></string>
     </dict>'''
 
-    # 1️⃣1️⃣ Body Track
     if features.get("body_track"):
         xml += '''
     <dict>
@@ -383,7 +342,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.bodytrack</string>
         <key>PayloadDisplayName</key>
-        <string>🎯 Body Track</string>
+        <string>Body Track</string>
         <key>PayloadContent</key>
         <string><![CDATA[
 <CenterCutSim>
@@ -415,7 +374,6 @@ def generate_mobile_config(key_data, udid):
         ]]></string>
     </dict>'''
 
-    # 1️⃣2️⃣ User Info
     xml += f'''
     <dict>
         <key>PayloadType</key>
@@ -423,7 +381,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadIdentifier</key>
         <string>com.duclam.info</string>
         <key>PayloadDisplayName</key>
-        <string>ℹ️ License Info</string>
+        <string>License Info</string>
         <key>PayloadContent</key>
         <dict>
             <key>UDID</key>
@@ -452,9 +410,7 @@ class MyHandler(SimpleHTTPRequestHandler):
     
     PROTECTED_FILES = [
         'x7k9m2p4.html',
-        'q8w5e3r1.html',
-        'admin.js',
-        'master.js'
+        'q8w5e3r1.html'
     ]
     
     def do_GET(self):
@@ -462,26 +418,24 @@ class MyHandler(SimpleHTTPRequestHandler):
         path = parsed.path
         query = urllib.parse.parse_qs(parsed.query)
         
-        # Bảo vệ file admin
         for protected in self.PROTECTED_FILES:
             if path.endswith(protected):
                 self.send_response(403)
                 self.send_header("Content-Type", "text/html")
                 self.end_headers()
-                self.wfile.write(b"""
+                self.wfile.write("""
                 <!DOCTYPE html>
                 <html>
                 <head><title>403 Forbidden</title></head>
                 <body style="text-align:center;font-family:sans-serif;padding:50px;background:#0a0a12;color:#e0e0e0;">
-                    <h1>🚫 403 Forbidden</h1>
+                    <h1>403 Forbidden</h1>
                     <p>Access denied.</p>
-                    <p><a href="/" style="color:#7b61ff;text-decoration:none;">← Back to home</a></p>
+                    <p><a href="/" style="color:#7b61ff;text-decoration:none;">Back to home</a></p>
                 </body>
                 </html>
-                """)
+                """.encode())
                 return
         
-        # API Validate Key
         if path == "/api/validate":
             key = query.get("key", [""])[0]
             result = validate_key(key)
@@ -491,7 +445,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # API Get Keys (Admin)
         if path == "/api/keys":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -515,7 +468,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             }).encode())
             return
         
-        # API Get All Admins (Master)
         if path == "/api/master-admins":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -533,7 +485,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"admins": DB["admins"]}).encode())
             return
         
-        # Serve static files
         if path == "/" or path == "":
             path = "/index.html"
         
@@ -555,7 +506,6 @@ class MyHandler(SimpleHTTPRequestHandler):
         except:
             data = {}
         
-        # API Admin Login
         if path == "/api/admin-login":
             username = data.get("username", "")
             password = data.get("password", "")
@@ -572,7 +522,6 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
             return
         
-        # API Master Login
         if path == "/api/master-login":
             username = data.get("username", "")
             password = data.get("password", "")
@@ -588,7 +537,6 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
             return
         
-        # API Create Key
         if path == "/api/create-key":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -616,7 +564,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # API Delete Key
         if path == "/api/delete-key":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -632,7 +579,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # API Use Key
         if path == "/api/use-key":
             result = use_key(
                 data.get("keyCode", ""),
@@ -645,7 +591,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                     xml = generate_mobile_config(key_data, data.get("udid", ""))
                     self.send_response(200)
                     self.send_header("Content-Type", "application/x-apple-aspen-config")
-                    self.send_header("Content-Disposition", "attachment; filename=Configplist OptiSystem⚡️.mobileconfig")
+                    self.send_header("Content-Disposition", "attachment; filename=Configplist_OptiSystem.mobileconfig")
                     self.end_headers()
                     self.wfile.write(xml.encode())
                     return
@@ -656,7 +602,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # API Master Create Admin
         if path == "/api/master-create-admin":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -699,12 +644,10 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({
                 "success": True,
-                "admin": new_admin,
-                "message": f"✅ Admin {username} created!"
+                "admin": new_admin
             }).encode())
             return
         
-        # API Master Delete Admin
         if path == "/api/master-delete-admin":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -723,7 +666,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True}).encode())
             return
         
-        # API Master Update Quota
         if path == "/api/master-update-quota":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -755,7 +697,6 @@ class MyHandler(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     server = HTTPServer(("0.0.0.0", port), MyHandler)
-    print(f"🚀 Server running at http://0.0.0.0:{port}")
-    print(f"👑 Master: {MASTER_USERNAME}")
-    print(f"📌 No default admin. Master must create admin accounts.")
+    print(f"Server running at http://0.0.0.0:{port}")
+    print(f"Master: {MASTER_USERNAME}")
     server.serve_forever()
