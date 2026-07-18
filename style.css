@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Panel 🧩</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="header">
+            <div class="icon">👑</div>
+            <h1>Master Panel</h1>
+            <div class="sub">Configuration Centre</div>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="login-box">
+            <div class="form-group">
+                <label>🔑 Mật khẩu Master</label>
+                <input type="password" id="masterPass" placeholder="Nhập mật khẩu master..." onkeydown="if(event.key==='Enter') masterLogin()">
+            </div>
+            <button class="btn" onclick="masterLogin()">Đăng nhập →</button>
+            <div id="loginMsg" class="msg"></div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="hidden">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <span style="font-size:14px;color:#aaa;">📦 Tổng admin: <strong id="totalAdmins" style="color:#00d4ff;">0</strong></span>
+                <span style="font-size:14px;color:#aaa;">🔑 Tổng key: <strong id="totalKeys" style="color:#00d4ff;">0</strong></span>
+            </div>
+
+            <!-- Tạo admin con -->
+            <div style="border-top:1px solid #2a2a3c;padding-top:16px;">
+                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">➕ Tạo Admin Con</h2>
+
+                <div class="form-group">
+                    <label>👤 Tên đăng nhập</label>
+                    <input type="text" id="adminUsername" placeholder="VD: admin2">
+                </div>
+                <div class="form-group">
+                    <label>🔑 Mật khẩu</label>
+                    <input type="text" id="adminPassword" placeholder="Mật khẩu admin con">
+                </div>
+                <div class="form-group">
+                    <label>📛 Tên hiển thị</label>
+                    <input type="text" id="adminDisplayName" placeholder="VD: Quản Trị Viên 2">
+                </div>
+                <div class="form-group">
+                    <label>📱 Zalo</label>
+                    <input type="text" id="adminZalo" placeholder="VD: 0879072010" value="0879072010">
+                </div>
+                <div class="form-group">
+                    <label>📦 Quota key</label>
+                    <input type="number" id="adminQuota" value="50" min="1">
+                </div>
+
+                <button class="btn" onclick="createAdmin()">Tạo admin →</button>
+                <div id="createMsg" class="msg"></div>
+            </div>
+
+            <!-- Danh sách admin con -->
+            <div class="key-list">
+                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">📋 Danh sách Admin</h2>
+                <div id="adminList"></div>
+            </div>
+
+            <div style="margin-top:16px;text-align:center;">
+                <a href="#" onclick="masterLogout(); return false;" style="color:#555;font-size:13px;text-decoration:none;">🚪 Đăng xuất</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ============================================================
+        // MASTER LOGIC
+        // ============================================================
+
+        function masterLogin() {
+            const pass = document.getElementById('masterPass').value.trim();
+            const msg = document.getElementById('loginMsg');
+
+            if (pass === MASTER_PASSWORD) {
+                document.getElementById('login-box').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                msg.className = 'msg';
+                msg.textContent = '';
+                renderAdminList();
+                updateStats();
+            } else {
+                msg.className = 'msg error';
+                msg.textContent = '❌ Sai mật khẩu master!';
+            }
+        }
+
+        function masterLogout() {
+            document.getElementById('login-box').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('masterPass').value = '';
+        }
+
+        function createAdmin() {
+            const username = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value.trim();
+            const displayName = document.getElementById('adminDisplayName').value.trim();
+            const zalo = document.getElementById('adminZalo').value.trim();
+            const quota = parseInt(document.getElementById('adminQuota').value) || 50;
+            const msg = document.getElementById('createMsg');
+
+            if (!username || !password) {
+                msg.className = 'msg error';
+                msg.textContent = '⚠️ Vui lòng nhập đầy đủ thông tin!';
+                return;
+            }
+
+            const result = createAdmin(username, password, displayName || username, zalo || '0879072010', quota);
+
+            if (!result.success) {
+                msg.className = 'msg error';
+                msg.textContent = '❌ ' + result.error;
+                return;
+            }
+
+            msg.className = 'msg success';
+            msg.textContent = `✅ Tạo admin thành công!\n👤 ${username} | Quota: ${quota} key`;
+
+            renderAdminList();
+            updateStats();
+
+            document.getElementById('adminUsername').value = '';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('adminDisplayName').value = '';
+            document.getElementById('adminZalo').value = '0879072010';
+            document.getElementById('adminQuota').value = '50';
+        }
+
+        function renderAdminList() {
+            const data = loadDB();
+            const admins = data.admins;
+            const container = document.getElementById('adminList');
+
+            if (admins.length === 0) {
+                container.innerHTML = '<div style="color:#555;text-align:center;padding:20px;">Chưa có admin nào</div>';
+                return;
+            }
+
+            let html = '';
+            admins.forEach(a => {
+                const statusClass = a.isActive ? '' : 'inactive';
+                const statusText = a.isActive ? '🟢 Hoạt động' : '🔴 Đã khóa';
+
+                html += `
+                <div class="admin-item">
+                    <div>
+                        <div class="name">${a.displayName || a.username}</div>
+                        <div style="font-size:11px;color:#666;">
+                            ${a.username} · ${a.keysUsed}/${a.keyQuota} key
+                            · Zalo: ${a.zalo || 'Chưa có'}
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="badge ${statusClass}">${statusText}</span>
+                        <div class="actions">
+                            <button onclick="editAdmin('${a.username}')" title="Sửa quota" style="color:#00d4ff;">✏️</button>
+                            <button class="del" onclick="deleteAdmin('${a.username}')" title="Xóa admin">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function editAdmin(username) {
+            const newQuota = prompt(`Nhập quota mới cho admin ${username}:`);
+            if (newQuota !== null) {
+                const quota = parseInt(newQuota);
+                if (!isNaN(quota) && quota > 0) {
+                    const result = updateAdminQuota(username, quota);
+                    if (result) {
+                        renderAdminList();
+                        updateStats();
+                        alert('✅ Cập nhật quota thành công!');
+                    } else {
+                        alert('❌ Không tìm thấy admin!');
+                    }
+                } else {
+                    alert('⚠️ Vui lòng nhập số hợp lệ!');
+                }
+            }
+        }
+
+        function deleteAdmin(username) {
+            if (confirm(`Xóa admin ${username}? (Tất cả key của admin này cũng sẽ bị xóa)`)) {
+                const data = loadDB();
+                data.keys = data.keys.filter(k => k.createdBy !== username);
+                deleteAdmin(username);
+                saveDB(data);
+                renderAdminList();
+                updateStats();
+            }
+        }
+
+        function updateStats() {
+            const data = loadDB();
+            document.getElementById('totalAdmins').textContent = data.admins.length;
+            document.getElementById('totalKeys').textContent = data.keys.length;
+        }
+    </script>
+</body>
+</html>
