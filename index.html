@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Centre 🧩</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="header">
+            <div class="icon">🧩</div>
+            <h1>Configuration Centre</h1>
+            <div class="sub">DUCLAM.NET</div>
+        </div>
+
+        <!-- STEP 1: NHẬP KEY -->
+        <div id="step-key">
+            <div class="form-group">
+                <label>🔑 License Key</label>
+                <input type="text" id="keyInput" placeholder="VD: VIP20260717-A1B2C3D4-001" onkeydown="if(event.key==='Enter') validateKey()">
+            </div>
+            <button class="btn" onclick="validateKey()" id="btnCheck">Kiểm tra key →</button>
+            <div id="msg" class="msg"></div>
+        </div>
+
+        <!-- STEP 2: THÔNG TIN + NHẬP UDID -->
+        <div id="step-udid" class="hidden">
+            <div class="info-box" id="keyInfo">
+                <div class="row"><span class="label">🔑 Key</span><span class="value" id="displayKey">---</span></div>
+                <div class="row"><span class="label">⏳ Hết hạn</span><span class="value" id="displayExpiry">---</span></div>
+                <div class="row"><span class="label">📱 Thiết bị</span><span class="value" id="displayDevice">0 / 0</span></div>
+            </div>
+
+            <div style="font-size:13px;font-weight:600;color:#aaa;margin:12px 0 4px;">📦 Chức năng</div>
+            <div id="featureList"></div>
+
+            <div style="font-size:13px;font-weight:600;color:#aaa;margin:16px 0 4px;">📱 Nhập UDID</div>
+            <div class="form-group">
+                <input type="text" id="udidInput" placeholder="VD: F2LQN1234567890ABCDEF" onkeydown="if(event.key==='Enter') generateConfig()">
+            </div>
+            <button class="btn" onclick="generateConfig()" id="btnDownload">⬇️ Tải cấu hình</button>
+
+            <div style="margin-top:14px;text-align:center;font-size:13px;color:#666;">
+                👨‍💻 Admin: <strong id="adminName" style="color:#e0e0e0;">Đức Lâm X Quang Hào</strong>
+                · 📱 Zalo: <a href="#" id="adminZalo" style="color:#00d4ff;text-decoration:none;">0879072010</a>
+            </div>
+            <div style="margin-top:10px;text-align:center;">
+                <a href="#" onclick="resetApp(); return false;" style="color:#555;font-size:12px;text-decoration:none;">← Nhập key khác</a>
+            </div>
+        </div>
+
+        <div style="text-align:center;color:#333;font-size:11px;margin-top:24px;letter-spacing:2px;text-transform:uppercase;">
+            Configuration Centre 🧩 · DUCLAM.NET
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ============================================================
+        // USER LOGIC
+        // ============================================================
+        let currentKey = '';
+        let currentKeyData = null;
+
+        function validateKey() {
+            const key = document.getElementById('keyInput').value.trim();
+            const msg = document.getElementById('msg');
+
+            if (!key) {
+                msg.className = 'msg error';
+                msg.textContent = '⚠️ Vui lòng nhập key';
+                return;
+            }
+
+            document.getElementById('btnCheck').textContent = '⏳ Đang kiểm tra...';
+            document.getElementById('btnCheck').disabled = true;
+
+            const result = validateKey(key);
+
+            if (!result.valid) {
+                msg.className = 'msg error';
+                msg.textContent = result.error;
+                document.getElementById('btnCheck').textContent = 'Kiểm tra key →';
+                document.getElementById('btnCheck').disabled = false;
+                return;
+            }
+
+            currentKey = key;
+            currentKeyData = result.key;
+
+            document.getElementById('step-key').classList.add('hidden');
+            document.getElementById('step-udid').classList.remove('hidden');
+
+            document.getElementById('displayKey').textContent = key;
+            document.getElementById('displayExpiry').textContent = new Date(currentKeyData.expiresAt).toLocaleDateString('vi-VN');
+            document.getElementById('displayDevice').textContent = currentKeyData.usedDevices.length + ' / ' + currentKeyData.maxDevices;
+            document.getElementById('adminName').textContent = currentKeyData.adminInfo.name || 'Đức Lâm X Quang Hào';
+            document.getElementById('adminZalo').textContent = currentKeyData.adminInfo.zalo || '0879072010';
+
+            // Hiển thị chức năng đã chọn
+            const list = document.getElementById('featureList');
+            list.innerHTML = '';
+            const featureNames = {
+                batteryOptimize: '🔋 Tối ưu pin',
+                performance: '⚡ Tối ưu máy',
+                reduceLag: '🌐 Giảm lag (DNS)',
+                antiLag: '📶 Chống giật (Wi-Fi)',
+                proxy: '🔗 Tăng tốc mạng (Proxy)',
+                dns: '🌐 DNS cơ bản',
+                certificate: '📜 Chứng chỉ'
+            };
+            let hasFeature = false;
+            for (const [key, name] of Object.entries(featureNames)) {
+                if (currentKeyData.features[key]) {
+                    hasFeature = true;
+                    list.innerHTML += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1a2e;border-radius:8px;margin-bottom:4px;font-size:13px;">
+                        <span style="color:#00d4ff;">✅</span>
+                        <span style="color:#e0e0e0;">${name}</span>
+                    </div>`;
+                }
+            }
+            if (!hasFeature) {
+                list.innerHTML = `<div style="color:#555;text-align:center;padding:10px;font-size:13px;">📭 Không có chức năng đặc biệt</div>`;
+            }
+
+            document.getElementById('btnCheck').textContent = 'Kiểm tra key →';
+            document.getElementById('btnCheck').disabled = false;
+            msg.className = 'msg';
+            msg.textContent = '';
+        }
+
+        function generateConfig() {
+            const udid = document.getElementById('udidInput').value.trim();
+
+            if (!udid) {
+                alert('⚠️ Vui lòng nhập UDID');
+                return;
+            }
+            if (!/^[0-9A-Fa-f]{40}$/.test(udid)) {
+                alert('⚠️ UDID không hợp lệ (phải 40 ký tự hex)');
+                return;
+            }
+
+            if (currentKeyData.usedDevices.find(d => d.udid === udid)) {
+                alert('⚠️ UDID này đã được đăng ký cho key này!');
+                return;
+            }
+
+            document.getElementById('btnDownload').textContent = '⏳ Đang tạo...';
+            document.getElementById('btnDownload').disabled = true;
+
+            const result = useKey(currentKey, udid);
+
+            if (!result.success) {
+                alert('❌ ' + result.error);
+                document.getElementById('btnDownload').textContent = '⬇️ Tải cấu hình';
+                document.getElementById('btnDownload').disabled = false;
+                return;
+            }
+
+            // ===== TẠO FILE .MOBILECONFIG =====
+            const xml = generateMobileConfig(currentKeyData, udid);
+            const blob = new Blob([xml], { type: 'application/x-apple-aspen-config' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Config_${udid.substring(0,8)}_${Date.now()}.mobileconfig`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            document.getElementById('btnDownload').textContent = '⬇️ Tải cấu hình';
+            document.getElementById('btnDownload').disabled = false;
+
+            // Cập nhật số lượng thiết bị
+            const updated = validateKey(currentKey);
+            if (updated.valid) {
+                document.getElementById('displayDevice').textContent = updated.key.usedDevices.length + ' / ' + updated.key.maxDevices;
+            }
+        }
+
+        function resetApp() {
+            document.getElementById('step-key').classList.remove('hidden');
+            document.getElementById('step-udid').classList.add('hidden');
+            document.getElementById('keyInput').value = '';
+            document.getElementById('udidInput').value = '';
+            document.getElementById('msg').className = 'msg';
+            document.getElementById('msg').textContent = '';
+            currentKey = '';
+            currentKeyData = null;
+        }
+    </script>
+</body>
+</html>
