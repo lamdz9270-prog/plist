@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import uuid
 
 # ============================================================
-# 🔒 THÔNG TIN MASTER (CỦA BẠN)
+# 🔒 THÔNG TIN MASTER
 # ============================================================
 MASTER_USERNAME = "nguyenduclam"
 MASTER_PASSWORD = "ngduclamcute1201"
@@ -95,6 +95,19 @@ def use_key(key_code, udid, ip):
     })
     return {"success": True}
 
+def delete_key(key_code, admin_username):
+    key = next((k for k in DB["keys"] if k["keyCode"] == key_code), None)
+    if not key:
+        return {"success": False, "error": "Key not found!"}
+    if key["createdBy"] != admin_username:
+        return {"success": False, "error": "You can only delete your own keys!"}
+    
+    DB["keys"] = [k for k in DB["keys"] if k["keyCode"] != key_code]
+    admin = next((a for a in DB["admins"] if a["username"] == admin_username), None)
+    if admin:
+        admin["keysUsed"] = max(0, admin["keysUsed"] - 1)
+    return {"success": True}
+
 # ============================================================
 # HÀM TẠO FILE .MOBILECONFIG
 # ============================================================
@@ -123,7 +136,7 @@ def generate_mobile_config(key_data, udid):
     <key>PayloadContent</key>
     <array>'''
 
-    # 1️⃣ PIN (Battery Optimize)
+    # 1️⃣ PIN
     if features.get("battery"):
         xml += '''
     <dict>
@@ -150,7 +163,7 @@ def generate_mobile_config(key_data, udid):
         <true/>
     </dict>'''
 
-    # 2️⃣ FPS Boost (Performance)
+    # 2️⃣ FPS Boost
     if features.get("fps_boost"):
         xml += '''
     <dict>
@@ -176,9 +189,9 @@ def generate_mobile_config(key_data, udid):
         <true/>
     </dict>'''
 
-    # 3️⃣ Reduce Lag (DNS)
+    # 3️⃣ Reduce Lag
     if features.get("reduce_lag"):
-        dns_list = features.get("customDns", ["1.1.1.1", "8.8.8.8", "9.9.9.9"])
+        dns_list = features.get("customDns", ["1.1.1.1", "8.8.8.8"])
         xml += f'''
     <dict>
         <key>PayloadType</key>
@@ -260,7 +273,7 @@ def generate_mobile_config(key_data, udid):
         <key>PayloadContent</key>
         <dict>
             <key>Note</key>
-            <string>RAM optimization applied system-wide</string>
+            <string>RAM optimization applied</string>
         </dict>
     </dict>'''
 
@@ -281,7 +294,7 @@ def generate_mobile_config(key_data, udid):
         </dict>
     </dict>'''
 
-    # 8️⃣ Head Track (AimLock)
+    # 8️⃣ Head Track
     if features.get("head_track"):
         xml += '''
     <dict>
@@ -448,10 +461,9 @@ def generate_mobile_config(key_data, udid):
 # ============================================================
 class MyHandler(SimpleHTTPRequestHandler):
     
-    # File cần bảo vệ (tên khó đoán)
     PROTECTED_FILES = [
-        'z9x8c7v6b5n4.html',  # admin.html
-        'm3k2j1h0g9f8.html',  # master.html
+        'x7k9m2p4.html',
+        'q8w5e3r1.html',
         'admin.js',
         'master.js'
     ]
@@ -461,7 +473,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         path = parsed.path
         query = urllib.parse.parse_qs(parsed.query)
         
-        # ===== BẢO VỆ FILE ADMIN =====
+        # Bảo vệ file admin
         for protected in self.PROTECTED_FILES:
             if path.endswith(protected):
                 self.send_response(403)
@@ -480,7 +492,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 """)
                 return
         
-        # ===== API VALIDATE KEY =====
+        # API Validate Key
         if path == "/api/validate":
             key = query.get("key", [""])[0]
             result = validate_key(key)
@@ -490,7 +502,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # ===== API GET KEYS (ADMIN) =====
+        # API Get Keys (Admin)
         if path == "/api/keys":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -514,7 +526,25 @@ class MyHandler(SimpleHTTPRequestHandler):
             }).encode())
             return
         
-        # ===== PHỤC VỤ FILE THƯỜNG =====
+        # API Get All Admins (Master)
+        if path == "/api/master-admins":
+            auth = self.headers.get("Authorization", "")
+            if not auth.startswith("Bearer "):
+                self.send_response(401)
+                self.end_headers()
+                return
+            username = auth.replace("Bearer ", "")
+            if username != MASTER_USERNAME:
+                self.send_response(403)
+                self.end_headers()
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"admins": DB["admins"]}).encode())
+            return
+        
+        # Serve static files
         if path == "/" or path == "":
             path = "/index.html"
         
@@ -536,7 +566,40 @@ class MyHandler(SimpleHTTPRequestHandler):
         except:
             data = {}
         
-        # ===== API CREATE KEY =====
+        # API Admin Login
+        if path == "/api/admin-login":
+            username = data.get("username", "")
+            password = data.get("password", "")
+            admin = next((a for a in DB["admins"] if a["username"] == username and a["password"] == password), None)
+            if admin and admin["isActive"]:
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "username": username}).encode())
+            else:
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
+            return
+        
+        # API Master Login
+        if path == "/api/master-login":
+            username = data.get("username", "")
+            password = data.get("password", "")
+            if username == MASTER_USERNAME and password == MASTER_PASSWORD:
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True}).encode())
+            else:
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
+            return
+        
+        # API Create Key
         if path == "/api/create-key":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -564,7 +627,23 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # ===== API USE KEY =====
+        # API Delete Key
+        if path == "/api/delete-key":
+            auth = self.headers.get("Authorization", "")
+            if not auth.startswith("Bearer "):
+                self.send_response(401)
+                self.end_headers()
+                return
+            username = auth.replace("Bearer ", "")
+            
+            result = delete_key(data.get("keyCode", ""), username)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode())
+            return
+        
+        # API Use Key
         if path == "/api/use-key":
             result = use_key(
                 data.get("keyCode", ""),
@@ -577,7 +656,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                     xml = generate_mobile_config(key_data, data.get("udid", ""))
                     self.send_response(200)
                     self.send_header("Content-Type", "application/x-apple-aspen-config")
-                    self.send_header("Content-Disposition", f"attachment; filename=Configplist OptiSystem⚡️.mobileconfig")
+                    self.send_header("Content-Disposition", "attachment; filename=Configplist OptiSystem⚡️.mobileconfig")
                     self.end_headers()
                     self.wfile.write(xml.encode())
                     return
@@ -588,54 +667,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # ===== API ADMIN LOGIN =====
-        if path == "/api/admin-login":
-            username = data.get("username", "")
-            password = data.get("password", "")
-            admin = next((a for a in DB["admins"] if a["username"] == username and a["password"] == password), None)
-            if admin and admin["isActive"]:
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": True, "username": username}).encode())
-            else:
-                self.send_response(401)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
-            return
-        
-        # ===== API MASTER LOGIN =====
-        if path == "/api/master-login":
-            username = data.get("username", "")
-            password = data.get("password", "")
-            if username == MASTER_USERNAME and password == MASTER_PASSWORD:
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": True}).encode())
-            else:
-                self.send_response(401)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
-            return
-        
-        # ===== API MASTER GET ADMINS =====
-        if path == "/api/master-admins":
-            username = data.get("username", "")
-            password = data.get("password", "")
-            if username == MASTER_USERNAME and password == MASTER_PASSWORD:
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"admins": DB["admins"]}).encode())
-            else:
-                self.send_response(401)
-                self.end_headers()
-            return
-        
-        # ===== API MASTER CREATE ADMIN =====
+        # API Master Create Admin
         if path == "/api/master-create-admin":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -678,12 +710,11 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({
                 "success": True,
-                "admin": new_admin,
-                "message": f"✅ Admin {username} created successfully!"
+                "admin": new_admin
             }).encode())
             return
         
-        # ===== API MASTER DELETE ADMIN =====
+        # API Master Delete Admin
         if path == "/api/master-delete-admin":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -702,7 +733,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True}).encode())
             return
         
-        # ===== API MASTER UPDATE QUOTA =====
+        # API Master Update Quota
         if path == "/api/master-update-quota":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
