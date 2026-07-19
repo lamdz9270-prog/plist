@@ -7,6 +7,8 @@ import random
 import string
 from datetime import datetime, timedelta
 import uuid
+import cgi
+import shutil
 
 # ============================================================
 # THÔNG TIN MASTER
@@ -84,23 +86,86 @@ def create_key(admin_username, custom_config, bonus_file=""):
     
     key_code = generate_key()
     
+    # 🔥 ĐẢM BẢO CẤU HÌNH KHÔNG BỊ TRỐNG
+    filename = custom_config.get("filename", "Config.mobileconfig")
+    if not filename.endswith(".mobileconfig"):
+        filename = "Config.mobileconfig"
+    
+    payload_display_name = custom_config.get("payloadDisplayName", "Configplist OptiSystem⚡️")
+    if not payload_display_name:
+        payload_display_name = "Configplist OptiSystem⚡️"
+    
+    payload_description = custom_config.get("payloadDescription", "DUCLAM.NET")
+    if not payload_description:
+        payload_description = "DUCLAM.NET"
+    
+    payload_identifier = custom_config.get("payloadIdentifier", "com.duclam.config")
+    if not payload_identifier:
+        payload_identifier = "com.duclam.config"
+    
+    # 🔥 NỘI DUNG XML MẶC ĐỊNH NẾU ADMIN BỎ TRỐNG
+    payload_content = custom_config.get("payloadContent", "")
+    if not payload_content:
+        payload_content = '''
+    <!-- Cấu hình DNS -->
+    <dict>
+        <key>PayloadType</key>
+        <string>com.apple.dnsProxy.managed</string>
+        <key>PayloadIdentifier</key>
+        <string>com.duclam.dns</string>
+        <key>PayloadDisplayName</key>
+        <string>DNS DUCLAM</string>
+        <key>DNSSettings</key>
+        <dict>
+            <key>DNSAddresses</key>
+            <array>
+                <string>1.1.1.1</string>
+                <string>8.8.8.8</string>
+            </array>
+        </dict>
+    </dict>
+    <!-- Thông tin key -->
+    <dict>
+        <key>PayloadType</key>
+        <string>com.apple.generic.managed</string>
+        <key>PayloadIdentifier</key>
+        <string>com.duclam.info</string>
+        <key>PayloadDisplayName</key>
+        <string>License Info</string>
+        <key>PayloadContent</key>
+        <dict>
+            <key>Key</key>
+            <string>{KEY}</string>
+            <key>UDID</key>
+            <string>{UDID}</string>
+            <key>Admin</key>
+            <string>{ADMIN}</string>
+            <key>Zalo</key>
+            <string>{ZALO}</string>
+        </dict>
+    </dict>
+'''
+    
+    expires_days = custom_config.get("expiresDays", 365)
+    max_devices = custom_config.get("maxDevices", 1)
+    
     new_key = {
         "keyCode": key_code,
         "createdBy": admin_username,
         "createdAt": datetime.now().isoformat(),
-        "expiresAt": (datetime.now() + timedelta(days=custom_config.get("expiresDays", 365))).isoformat(),
-        "maxDevices": custom_config.get("maxDevices", 1),
-        "usedDevices": [],  # 🔥 Lưu UDID/IP đã dùng
+        "expiresAt": (datetime.now() + timedelta(days=expires_days)).isoformat(),
+        "maxDevices": max_devices,
+        "usedDevices": [],
         "adminInfo": {"name": admin["displayName"], "zalo": admin["zalo"]},
         "isActive": True,
-        "isUsed": False,  # 🔥 Đánh dấu key đã được sử dụng chưa
+        "isUsed": False,
         "bonusFile": bonus_file,
         "customConfig": {
-            "filename": custom_config.get("filename", "Config.mobileconfig"),
-            "payloadDisplayName": custom_config.get("payloadDisplayName", "Configplist OptiSystem⚡️"),
-            "payloadDescription": custom_config.get("payloadDescription", "DUCLAM.NET"),
-            "payloadIdentifier": custom_config.get("payloadIdentifier", "com.duclam.config"),
-            "payloadContent": custom_config.get("payloadContent", "")
+            "filename": filename,
+            "payloadDisplayName": payload_display_name,
+            "payloadDescription": payload_description,
+            "payloadIdentifier": payload_identifier,
+            "payloadContent": payload_content
         }
     }
     
@@ -121,14 +186,10 @@ def validate_key(key_code):
         return {"valid": False, "error": "Key is locked!"}
     if datetime.fromisoformat(key["expiresAt"]) < datetime.now():
         return {"valid": False, "error": "Key expired!"}
-    
-    # 🔥 KIỂM TRA KEY ĐÃ ĐƯỢC SỬ DỤNG CHƯA
     if key.get("isUsed", False):
         return {"valid": False, "error": "Key already used!"}
-    
     if len(key["usedDevices"]) >= key["maxDevices"]:
         return {"valid": False, "error": "Key reached max devices!"}
-    
     return {"valid": True, "key": key}
 
 def use_key(key_code, udid, ip):
@@ -140,27 +201,21 @@ def use_key(key_code, udid, ip):
     
     if not key:
         return {"success": False, "error": "Key not found!"}
-    
-    # 🔥 KIỂM TRA KEY ĐÃ ĐƯỢC SỬ DỤNG CHƯA
     if key.get("isUsed", False):
         return {"success": False, "error": "Key already used by another device!"}
-    
     if len(key["usedDevices"]) >= key["maxDevices"]:
         return {"success": False, "error": "Key reached max devices!"}
     
-    # Kiểm tra UDID đã tồn tại
     for d in key["usedDevices"]:
         if d["udid"] == udid:
             return {"success": False, "error": "UDID already registered!"}
     
-    # 🔥 LƯU UDID/IP VÀ ĐÁNH DẤU KEY ĐÃ DÙNG
     key["usedDevices"].append({
         "udid": udid,
         "ip": ip or "0.0.0.0",
         "usedAt": datetime.now().isoformat()
     })
     
-    # 🔥 Nếu maxDevices = 1, đánh dấu key đã dùng
     if key["maxDevices"] <= 1:
         key["isUsed"] = True
     
@@ -178,7 +233,6 @@ def delete_key(key_code, admin_username):
     if key["createdBy"] != admin_username:
         return {"success": False, "error": "You can only delete your own keys!"}
     
-    # Xóa file tặng kèm nếu có
     if key.get("bonusFile"):
         try:
             os.remove(os.path.join(UPLOAD_DIR, key["bonusFile"]))
@@ -308,7 +362,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         
-        # 🔥 XỬ LÝ UPLOAD FILE (BONUS)
+        # Upload bonus file
         if path == "/api/upload-bonus":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -337,7 +391,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             filename = file_item.filename
             file_data = file_item.file.read()
             
-            # Lưu file
             file_path = os.path.join(UPLOAD_DIR, filename)
             with open(file_path, "wb") as f:
                 f.write(file_data)
@@ -351,7 +404,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             }).encode())
             return
         
-        # 🔥 XỬ LÝ DOWNLOAD FILE BONUS
+        # Download bonus file
         if path.startswith("/api/download-bonus/"):
             filename = path.replace("/api/download-bonus/", "")
             file_path = os.path.join(UPLOAD_DIR, filename)
@@ -371,7 +424,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(content)
             return
         
-        # Xử lý POST JSON
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length).decode()
         
@@ -422,7 +474,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
             return
         
-        # 🔥 CREATE KEY (Có bonus file)
+        # Create Key
         if path == "/api/create-key":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -471,7 +523,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # 🔥 USE KEY (Tải file config)
+        # Use Key (Download Config)
         if path == "/api/use-key":
             result = use_key(
                 data.get("keyCode", ""),
