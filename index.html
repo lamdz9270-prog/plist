@@ -30,9 +30,6 @@
                 <div class="row"><span class="label">Devices</span><span class="value" id="displayDevice">0 / 0</span></div>
             </div>
 
-            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:12px 0 4px;">Features</div>
-            <div id="featureList"></div>
-
             <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:16px 0 4px;">Enter UDID</div>
             <div class="form-group">
                 <input type="text" id="udidInput" placeholder="VD: F2LQN1234567890ABCDEF" onkeydown="if(event.key==='Enter') generateConfig()">
@@ -92,32 +89,6 @@
                     document.getElementById('adminZalo').textContent = data.key.adminInfo.zalo || '0879072010';
                     document.getElementById('adminZalo').href = 'https://zalo.me/' + (data.key.adminInfo.zalo || '0879072010');
 
-                    const list = document.getElementById('featureList');
-                    list.innerHTML = '';
-                    const featureMap = {
-                        battery: '🔋 Battery Optimize',
-                        fps_boost: '⚡ FPS Boost',
-                        reduce_lag: '🌐 DNS Optimizer',
-                        ad_block: '🚫 Ad Blocker',
-                        network_optimize: '📶 Wi-Fi 5GHz',
-                        ram_clean: '🧹 RAM Optimizer',
-                        cache_clean: '🗑️ Cache Cleaner',
-                        head_track: '🎯 Head Track',
-                        fix_recoil: '🔫 Fix Recoil',
-                        light_scope: '⚖️ Light Scope',
-                        body_track: '🎯 Body Track'
-                    };
-                    let has = false;
-                    for (const [k, v] of Object.entries(featureMap)) {
-                        if (data.key.features[k]) {
-                            has = true;
-                            list.innerHTML += `<div class="feature-item"><span class="icon">✅</span><span>${v}</span></div>`;
-                        }
-                    }
-                    if (!has) {
-                        list.innerHTML = `<div style="color:rgba(255,255,255,0.2);text-align:center;padding:10px;">No features</div>`;
-                    }
-
                     document.getElementById('btnCheck').textContent = 'Check Key';
                     document.getElementById('btnCheck').disabled = false;
                     msg.className = 'msg';
@@ -166,7 +137,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'Configplist OptiSystem.mobileconfig';
+                a.download = currentKeyData.customConfig?.filename || 'Config.mobileconfig';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
