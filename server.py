@@ -68,31 +68,31 @@ def admin_login_check(username, password, ip):
 # ============================================================
 # HÀM XỬ LÝ KEY
 # ============================================================
-def create_key(package, expires_days, max_devices, features, custom_dns, admin_username):
+def create_key(admin_username, custom_config):
     admin = find_admin(admin_username)
     if not admin:
         return {"success": False, "error": "Admin not found!"}
     if admin["keysUsed"] >= admin["keyQuota"]:
         return {"success": False, "error": "Key quota exceeded!"}
     
-    # 🔥 Tạo key 8 ký tự
     key_code = generate_key()
     
     new_key = {
         "keyCode": key_code,
-        "package": package,
         "createdBy": admin_username,
         "createdAt": datetime.now().isoformat(),
-        "expiresAt": (datetime.now() + timedelta(days=expires_days)).isoformat(),
-        "maxDevices": max_devices,
-        "usedDevices": [],
-        "features": features,
         "adminInfo": {"name": admin["displayName"], "zalo": admin["zalo"]},
-        "isActive": True
+        "isActive": True,
+        "usedDevices": [],
+        # 🔥 Thông tin cấu hình do admin tùy chỉnh
+        "customConfig": {
+            "filename": custom_config.get("filename", "Config.mobileconfig"),
+            "payloadDisplayName": custom_config.get("payloadDisplayName", "Configplist OptiSystem⚡️"),
+            "payloadDescription": custom_config.get("payloadDescription", "DUCLAM.NET"),
+            "payloadIdentifier": custom_config.get("payloadIdentifier", "com.duclam.config"),
+            "payloadContent": custom_config.get("payloadContent", "")
+        }
     }
-    
-    if custom_dns and features.get("reduce_lag"):
-        new_key["features"]["customDns"] = custom_dns
     
     DB["keys"].append(new_key)
     admin["keysUsed"] += 1
@@ -109,9 +109,7 @@ def validate_key(key_code):
         return {"valid": False, "error": "Key not found!"}
     if not key["isActive"]:
         return {"valid": False, "error": "Key is locked!"}
-    if datetime.fromisoformat(key["expiresAt"]) < datetime.now():
-        return {"valid": False, "error": "Key expired!"}
-    if len(key["usedDevices"]) >= key["maxDevices"]:
+    if len(key["usedDevices"]) >= key.get("maxDevices", 1):
         return {"valid": False, "error": "Key reached max devices!"}
     return {"valid": True, "key": key}
 
@@ -124,7 +122,7 @@ def use_key(key_code, udid, ip):
     
     if not key:
         return {"success": False, "error": "Key not found!"}
-    if len(key["usedDevices"]) >= key["maxDevices"]:
+    if len(key["usedDevices"]) >= key.get("maxDevices", 1):
         return {"success": False, "error": "Key reached max devices!"}
     
     for d in key["usedDevices"]:
@@ -157,307 +155,46 @@ def delete_key(key_code, admin_username):
     return {"success": True}
 
 # ============================================================
-# HÀM TẠO FILE .MOBILECONFIG
+# HÀM TẠO FILE .MOBILECONFIG TỪ CUSTOM CONFIG
 # ============================================================
 def generate_mobile_config(key_data, udid):
+    config = key_data.get("customConfig", {})
+    
+    # Lấy các thông tin từ custom config
+    display_name = config.get("payloadDisplayName", "Configplist OptiSystem⚡️")
+    description = config.get("payloadDescription", "DUCLAM.NET")
+    identifier = config.get("payloadIdentifier", "com.duclam.config")
+    custom_content = config.get("payloadContent", "")
+    
+    # Thay thế biến động
+    custom_content = custom_content.replace("{KEY}", key_data["keyCode"])
+    custom_content = custom_content.replace("{UDID}", udid)
+    custom_content = custom_content.replace("{ADMIN}", key_data["adminInfo"]["name"])
+    custom_content = custom_content.replace("{ZALO}", key_data["adminInfo"]["zalo"])
+    custom_content = custom_content.replace("{DATE}", datetime.now().strftime("%Y-%m-%d"))
+    
     uuid_str = str(uuid.uuid4())
-    features = key_data.get("features", {})
     
     xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>PayloadDisplayName</key>
-    <string>Configplist OptiSystem⚡️</string>
+    <string>{display_name}</string>
     <key>PayloadDescription</key>
-    <string>DUCLAM.NET - {key_data["adminInfo"]["name"]} | Zalo: {key_data["adminInfo"]["zalo"]}</string>
+    <string>{description}</string>
     <key>PayloadIdentifier</key>
-    <string>com.duclam.config.{udid}</string>
+    <string>{identifier}.{udid}</string>
     <key>PayloadType</key>
     <string>Configuration</string>
     <key>PayloadUUID</key>
     <string>{uuid_str}</string>
     <key>PayloadVersion</key>
     <integer>1</integer>
-    <key>PayloadExpiration</key>
-    <date>{key_data["expiresAt"].replace('Z', '')}Z</date>
     <key>PayloadContent</key>
-    <array>'''
-
-    if features.get("battery"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.appmanaged</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.battery</string>
-        <key>PayloadDisplayName</key>
-        <string>🔋 Battery Optimize</string>
-        <key>PayloadContent</key>
-        <dict>
-            <key>BackgroundAppRefresh</key>
-            <false/>
-        </dict>
-    </dict>'''
-
-    if features.get("fps_boost"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.SoftwareUpdate</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.update</string>
-        <key>PayloadDisplayName</key>
-        <string>⚡ FPS Boost</string>
-        <key>AutomaticDownload</key>
-        <false/>
-        <key>AutomaticAppInstallation</key>
-        <false/>
-    </dict>'''
-
-    if features.get("reduce_lag"):
-        dns_list = features.get("customDns", ["1.1.1.1", "8.8.8.8"])
-        xml += f'''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.dnsProxy.managed</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.dns</string>
-        <key>PayloadDisplayName</key>
-        <string>🌐 DNS Optimizer</string>
-        <key>DNSSettings</key>
-        <dict>
-            <key>DNSAddresses</key>
-            <array>'''
-        for d in dns_list:
-            xml += f'''
-                <string>{d.strip()}</string>'''
-        xml += '''
-            </array>
-        </dict>
-    </dict>'''
-
-    if features.get("ad_block"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.webcontent-filter</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.adblock</string>
-        <key>PayloadDisplayName</key>
-        <string>🚫 Ad Blocker</string>
-        <key>FilterWhitelist</key>
-        <array>
-            <string>*.garena.com</string>
-            <string>*.freefire.com</string>
-        </array>
-    </dict>'''
-
-    if features.get("network_optimize"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.wifi.managed</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.wifi</string>
-        <key>PayloadDisplayName</key>
-        <string>📶 Wi-Fi 5GHz</string>
-        <key>PreferredNetworks</key>
-        <array>
-            <dict>
-                <key>SSID_STR</key>
-                <string>DUCLAM_WIFI</string>
-                <key>PreferredBand</key>
-                <integer>5</integer>
-            </dict>
-        </array>
-    </dict>'''
-
-    if features.get("ram_clean"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.generic.managed</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.ram</string>
-        <key>PayloadDisplayName</key>
-        <string>🧹 RAM Optimizer</string>
-        <key>PayloadContent</key>
-        <dict>
-            <key>Note</key>
-            <string>RAM optimization applied</string>
-        </dict>
-    </dict>'''
-
-    if features.get("cache_clean"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.generic.managed</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.cache</string>
-        <key>PayloadDisplayName</key>
-        <string>🗑️ Cache Cleaner</string>
-        <key>PayloadContent</key>
-        <dict>
-            <key>Note</key>
-            <string>Cache cleaned on app launch</string>
-        </dict>
-    </dict>'''
-
-    if features.get("head_track"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.duclam.aimlock</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.aimlock</string>
-        <key>PayloadDisplayName</key>
-        <string>🎯 Head Track</string>
-        <key>PayloadContent</key>
-        <string><![CDATA[
-<AimLockConfig>
-    <Header>
-        <StartMarker>--AIMLOCK-SESSION-START--</StartMarker>
-        <Version>1.1.0</Version>
-        <TimestampFormat>ISO8601</TimestampFormat>
-        <Author>Operator</Author>
-    </Header>
-    <AimLock>
-        <Enable>true</Enable>
-        <LockZone>center</LockZone>
-        <LockStrength value="0.95"/>
-        <Smooth value="0.50"/>
-        <MaxCorrection value="0.12"/>
-        <MinSmooth value="0.20"/>
-        <SnapThreshold value="0.03"/>
-        <TargetPredict enabled="true" horizonMs="80"/>
-        <AutoRelease enabled="true" conditions="targetLost|timeout|manualOverride" timeoutMs="1200"/>
-        <Priority>high</Priority>
-        <StabilityBoost value="0.90"/>
-    </AimLock>
-    <Logging>
-        <LogLevel>verbose</LogLevel>
-        <LogFormat>json</LogFormat>
-        <IncludeTimestamps>true</IncludeTimestamps>
-        <RecordStartStopEvents>true</RecordStartStopEvents>
-        <StartEventTag>AIMLOCK_START</StartEventTag>
-        <EndEventTag>AIMLOCK_END</EndEventTag>
-        <Heartbeat intervalMs="500"/>
-    </Logging>
-    <Footer>
-        <EndMarker>--AIMLOCK-SESSION-END--</EndMarker>
-        <Checksum enabled="true" algorithm="SHA256"/>
-        <Summary enabled="true" maxLines="8"/>
-    </Footer>
-</AimLockConfig>
-        ]]></string>
-    </dict>'''
-
-    if features.get("fix_recoil"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.duclam.recoil</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.recoil</string>
-        <key>PayloadDisplayName</key>
-        <string>🔫 Fix Recoil</string>
-        <key>PayloadContent</key>
-        <string><![CDATA[
-<RecoilConfig>
-    <Enable>true</Enable>
-    <Horizontal value="0.15"/>
-    <Vertical value="0.20"/>
-    <Smoothness value="0.85"/>
-</RecoilConfig>
-        ]]></string>
-    </dict>'''
-
-    if features.get("light_scope"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.duclam.lightscope</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.lightscope</string>
-        <key>PayloadDisplayName</key>
-        <string>⚖️ Light Scope</string>
-        <key>PayloadContent</key>
-        <string><![CDATA[
-<LightScopeConfig>
-    <Enable>true</Enable>
-    <Sensitivity value="0.85"/>
-    <AimAssist value="0.70"/>
-</LightScopeConfig>
-        ]]></string>
-    </dict>'''
-
-    if features.get("body_track"):
-        xml += '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.duclam.bodytrack</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.bodytrack</string>
-        <key>PayloadDisplayName</key>
-        <string>🎯 Body Track</string>
-        <key>PayloadContent</key>
-        <string><![CDATA[
-<CenterCutSim>
-    <Header>
-        <StartMarker>--CENTERCUT-SIM-START--</StartMarker>
-        <Version>sim-0.1</Version>
-        <TimestampFormat>ISO8601</TimestampFormat>
-        <Author>Analyst</Author>
-    </Header>
-    <Meta>
-        <Enable>true</Enable>
-        <CutRatio value="0.6"/>
-        <StabilityBoost enabled="true"/>
-    </Meta>
-    <Logging>
-        <LogLevel>verbose</LogLevel>
-        <LogFormat>json</LogFormat>
-        <RecordEvents>true</RecordEvents>
-        <StartEventTag>CENTERCUT_SIM_START</StartEventTag>
-        <EndEventTag>CENTERCUT_SIM_END</EndEventTag>
-        <Heartbeat intervalMs="1000"/>
-    </Logging>
-    <Footer>
-        <EndMarker>--CENTERCUT-SIM-END--</EndMarker>
-        <Checksum enabled="true" algorithm="SHA256"/>
-        <Summary enabled="true" maxLines="8"/>
-    </Footer>
-</CenterCutSim>
-        ]]></string>
-    </dict>'''
-
-    xml += f'''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.generic.managed</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.info</string>
-        <key>PayloadDisplayName</key>
-        <string>ℹ️ License Info</string>
-        <key>PayloadContent</key>
-        <dict>
-            <key>UDID</key>
-            <string>{udid}</string>
-            <key>Key</key>
-            <string>{key_data["keyCode"]}</string>
-            <key>Admin</key>
-            <string>{key_data["adminInfo"]["name"]}</string>
-            <key>Zalo</key>
-            <string>{key_data["adminInfo"]["zalo"]}</string>
-            <key>Expires</key>
-            <string>{key_data["expiresAt"].split('T')[0]}</string>
-        </dict>
-    </dict>'''
-
-    xml += '''
-</array>
+    <array>
+        {custom_content}
+    </array>
 </dict>
 </plist>'''
     return xml
@@ -542,7 +279,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         except:
             data = {}
         
-        # 🔥 Admin Login (có Username + Password + IP Lock)
+        # Admin Login (có Username + Password + IP Lock)
         if path == "/api/admin-login":
             username = data.get("username", "")
             password = data.get("password", "")
@@ -568,6 +305,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 }).encode())
             return
         
+        # Master Login
         if path == "/api/master-login":
             username = data.get("username", "")
             password = data.get("password", "")
@@ -583,6 +321,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
             return
         
+        # 🔥 CREATE KEY (Có custom config)
         if path == "/api/create-key":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -596,20 +335,23 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 return
             
-            result = create_key(
-                data.get("package", "vip"),
-                data.get("expiresDays", 365),
-                data.get("maxDevices", 1),
-                data.get("features", {}),
-                data.get("customDns", []),
-                username
-            )
+            # Lấy custom config từ request
+            custom_config = {
+                "filename": data.get("filename", "Config.mobileconfig"),
+                "payloadDisplayName": data.get("payloadDisplayName", "Configplist OptiSystem⚡️"),
+                "payloadDescription": data.get("payloadDescription", "DUCLAM.NET"),
+                "payloadIdentifier": data.get("payloadIdentifier", "com.duclam.config"),
+                "payloadContent": data.get("payloadContent", "")
+            }
+            
+            result = create_key(username, custom_config)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(result).encode())
             return
         
+        # Delete Key
         if path == "/api/delete-key":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -625,6 +367,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
+        # 🔥 USE KEY (Tải file với custom config)
         if path == "/api/use-key":
             result = use_key(
                 data.get("keyCode", ""),
@@ -639,9 +382,10 @@ class MyHandler(SimpleHTTPRequestHandler):
                         break
                 if key_data:
                     xml = generate_mobile_config(key_data, data.get("udid", ""))
+                    filename = key_data.get("customConfig", {}).get("filename", "Config.mobileconfig")
                     self.send_response(200)
                     self.send_header("Content-Type", "application/x-apple-aspen-config")
-                    self.send_header("Content-Disposition", "attachment; filename=Configplist OptiSystem.mobileconfig")
+                    self.send_header("Content-Disposition", f"attachment; filename={filename}")
                     self.end_headers()
                     self.wfile.write(xml.encode())
                     return
@@ -652,6 +396,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
+        # Master Create Admin
         if path == "/api/master-create-admin":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -699,6 +444,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             }).encode())
             return
         
+        # Master Delete Admin
         if path == "/api/master-delete-admin":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -717,6 +463,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True}).encode())
             return
         
+        # Master Update Quota
         if path == "/api/master-update-quota":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -751,5 +498,5 @@ if __name__ == "__main__":
     print(f"Server running at http://0.0.0.0:{port}")
     print(f"Master: {MASTER_USERNAME}")
     print("✅ Key format: 8 characters (e.g. A1B2C3D4)")
-    print("✅ Each admin can only login from 1 IP (locked on first login)")
+    print("✅ Admin can customize config content")
     server.serve_forever()
