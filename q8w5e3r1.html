@@ -23,7 +23,7 @@
                 <label>🔑 Master Password</label>
                 <input type="password" id="masterPass" placeholder="Enter password..." onkeydown="if(event.key==='Enter') masterLogin()">
             </div>
-            <button class="btn" onclick="masterLogin()">Login</button>
+            <button class="btn btn-primary" onclick="masterLogin()">Login</button>
             <div id="loginMsg" class="msg"></div>
         </div>
 
@@ -57,7 +57,7 @@
                     <input type="number" id="newAdminQuota" value="50" min="1">
                 </div>
 
-                <button class="btn" onclick="createAdmin()">Create Admin</button>
+                <button class="btn btn-primary" onclick="createAdmin()">Create Admin</button>
                 <div id="createMsg" class="msg"></div>
             </div>
 
