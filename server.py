@@ -76,10 +76,9 @@ def admin_login_check(username, password, ip):
     return {"success": True, "admin": admin}
 
 # ============================================================
-# HÀM XỬ LÝ MULTIPART FORM DATA (KHÔNG DÙNG CGI)
+# HÀM XỬ LÝ MULTIPART FORM DATA
 # ============================================================
 def parse_multipart(content_type, body):
-    """Parse multipart/form-data manually"""
     if not content_type or not body:
         return None
     
@@ -94,7 +93,6 @@ def parse_multipart(content_type, body):
         if not part.strip() or b"filename=" not in part:
             continue
         
-        # Tìm filename
         lines = part.split(b"\r\n")
         filename = None
         file_data = None
@@ -148,6 +146,7 @@ def create_key(admin_username, custom_config, bonus_file=""):
         payload_identifier = "com.duclam.config"
     
     payload_content = custom_config.get("payloadContent", "")
+    # 🔥 Nếu payload trống, dùng mặc định (không để trống)
     if not payload_content:
         payload_content = '''
     <dict>
@@ -157,6 +156,8 @@ def create_key(admin_username, custom_config, bonus_file=""):
         <string>com.duclam.dns</string>
         <key>PayloadDisplayName</key>
         <string>DNS DUCLAM</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
         <key>DNSSettings</key>
         <dict>
             <key>DNSAddresses</key>
@@ -173,6 +174,8 @@ def create_key(admin_username, custom_config, bonus_file=""):
         <string>com.duclam.info</string>
         <key>PayloadDisplayName</key>
         <string>License Info</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
         <key>PayloadContent</key>
         <dict>
             <key>Key</key>
@@ -287,7 +290,7 @@ def delete_key(key_code, admin_username):
     return {"success": True}
 
 # ============================================================
-# HÀM TẠO FILE .MOBILECONFIG
+# HÀM TẠO FILE .MOBILECONFIG (KHÔNG SỬA PAYLOAD)
 # ============================================================
 def generate_mobile_config(key_data, udid):
     config = key_data.get("customConfig", {})
@@ -297,11 +300,13 @@ def generate_mobile_config(key_data, udid):
     identifier = config.get("payloadIdentifier", "com.duclam.config")
     custom_content = config.get("payloadContent", "")
     
+    # 🔥 CHỈ THAY THẾ BIẾN, KHÔNG SỬA NỘI DUNG PAYLOAD
     custom_content = custom_content.replace("{KEY}", key_data["keyCode"])
     custom_content = custom_content.replace("{UDID}", udid)
     custom_content = custom_content.replace("{ADMIN}", key_data["adminInfo"]["name"])
     custom_content = custom_content.replace("{ZALO}", key_data["adminInfo"]["zalo"])
     custom_content = custom_content.replace("{DATE}", datetime.now().strftime("%Y-%m-%d"))
+    custom_content = custom_content.replace("{BONUS_LINK}", key_data.get("bonusFile", "No bonus file"))
     
     uuid_str = str(uuid.uuid4())
     
@@ -402,7 +407,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         
-        # 🔥 XỬ LÝ UPLOAD FILE (KHÔNG DÙNG CGI)
+        # Upload bonus file
         if path == "/api/upload-bonus":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
