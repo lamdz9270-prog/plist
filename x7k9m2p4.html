@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configplist OptiSystem⚡️ - Admin</title>
+    <title>Admin Panel - Configplist OptiSystem⚡️</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .ip-display {
@@ -26,6 +26,56 @@
             display: none;
         }
         .login-error.show { display: block; }
+        .config-preview {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .config-preview .highlight {
+            color: #00d4ff;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            font-size: 14px;
+            color: #e0e0e0;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #7b61ff;
+            background: rgba(123,97,255,0.05);
+            box-shadow: 0 0 25px rgba(123,97,255,0.08);
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
     </style>
 </head>
 <body>
@@ -62,55 +112,60 @@
                 <span class="ip-value" id="adminIp">Not set</span>
             </div>
 
+            <!-- ===== TẠO KEY + TÙY CHỈNH CONFIG ===== -->
             <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;">
-                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">Create New Key</h2>
+                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">🔑 Create Key</h2>
 
                 <div class="form-group">
-                    <label>Package</label>
-                    <select id="packageSelect">
-                        <option value="vip">VIP</option>
-                        <option value="gold">GOLD</option>
-                        <option value="free">FREE</option>
-                        <option value="premium">PREMIUM</option>
-                    </select>
+                    <label>📄 Filename</label>
+                    <input type="text" id="filename" value="Config.mobileconfig" placeholder="VD: Config_VIP.mobileconfig">
                 </div>
 
                 <div class="form-group">
-                    <label>Expiry (days)</label>
+                    <label>📛 Payload Display Name</label>
+                    <input type="text" id="payloadDisplayName" value="Configplist OptiSystem⚡️" placeholder="Tên hiển thị khi cài">
+                </div>
+
+                <div class="form-group">
+                    <label>📝 Payload Description</label>
+                    <input type="text" id="payloadDescription" value="DUCLAM.NET" placeholder="Mô tả cấu hình">
+                </div>
+
+                <div class="form-group">
+                    <label>🔗 Payload Identifier</label>
+                    <input type="text" id="payloadIdentifier" value="com.duclam.config" placeholder="VD: com.duclam.config">
+                </div>
+
+                <div class="form-group">
+                    <label>📦 Payload Content (XML)</label>
+                    <textarea id="payloadContent" placeholder="Nội dung cấu hình...&#10;Hỗ trợ biến: {KEY}, {UDID}, {ADMIN}, {ZALO}, {DATE}"></textarea>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:4px;">
+                        💡 Biến: <code>{KEY}</code> - Key code · <code>{UDID}</code> - UDID · <code>{ADMIN}</code> - Admin name · <code>{ZALO}</code> - Zalo · <code>{DATE}</code> - Ngày tạo
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>⏳ Expiry (days)</label>
                     <input type="number" id="expiryDays" value="365" min="1" max="9999">
                 </div>
 
                 <div class="form-group">
-                    <label>Max Devices</label>
+                    <label>📱 Max Devices</label>
                     <input type="number" id="maxDevices" value="1" min="1" max="999">
-                </div>
-
-                <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:12px 0 4px;">Features</div>
-                <div class="feature-grid">
-                    <label><input type="checkbox" class="feature-chk" value="battery" checked> 🔋 Battery</label>
-                    <label><input type="checkbox" class="feature-chk" value="fps_boost" checked> ⚡ FPS</label>
-                    <label><input type="checkbox" class="feature-chk" value="reduce_lag" checked> 🌐 DNS</label>
-                    <label><input type="checkbox" class="feature-chk" value="ad_block" checked> 🚫 AdBlock</label>
-                    <label><input type="checkbox" class="feature-chk" value="network_optimize"> 📶 Wi-Fi</label>
-                    <label><input type="checkbox" class="feature-chk" value="ram_clean"> 🧹 RAM</label>
-                    <label><input type="checkbox" class="feature-chk" value="cache_clean"> 🗑️ Cache</label>
-                    <label><input type="checkbox" class="feature-chk" value="head_track"> 🎯 Head</label>
-                    <label><input type="checkbox" class="feature-chk" value="fix_recoil"> 🔫 Recoil</label>
-                    <label><input type="checkbox" class="feature-chk" value="light_scope"> ⚖️ Scope</label>
-                    <label><input type="checkbox" class="feature-chk" value="body_track"> 🎯 Body</label>
-                </div>
-
-                <div class="form-group">
-                    <label>Custom DNS (1 per line)</label>
-                    <textarea id="customDns" rows="2" placeholder="1.1.1.1&#10;8.8.8.8"></textarea>
                 </div>
 
                 <button class="btn" onclick="createKey()">Create Key</button>
                 <div id="createMsg" class="msg"></div>
+                
+                <!-- Preview -->
+                <div class="config-preview" id="configPreview">
+                    <span style="color:rgba(255,255,255,0.2);">📄 Preview config will appear here...</span>
+                </div>
             </div>
 
+            <!-- Danh sách key -->
             <div class="key-list">
-                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">My Keys</h2>
+                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">📋 My Keys</h2>
                 <div id="keyList"></div>
             </div>
 
@@ -126,6 +181,9 @@
         let currentAdmin = null;
         let adminIp = '';
 
+        // ============================================================
+        // ADMIN LOGIN
+        // ============================================================
         function adminLogin() {
             const username = document.getElementById('adminUser').value.trim();
             const password = document.getElementById('adminPass').value.trim();
@@ -173,8 +231,51 @@
             document.getElementById('adminPass').value = '';
         }
 
+        // ============================================================
+        // PREVIEW CONFIG
+        // ============================================================
+        function updatePreview() {
+            const displayName = document.getElementById('payloadDisplayName').value || 'Configplist OptiSystem⚡️';
+            const description = document.getElementById('payloadDescription').value || 'DUCLAM.NET';
+            const identifier = document.getElementById('payloadIdentifier').value || 'com.duclam.config';
+            const content = document.getElementById('payloadContent').value || '<!-- Nội dung cấu hình -->';
+            
+            const preview = document.getElementById('configPreview');
+            preview.innerHTML = `
+<span class="highlight">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="highlight">&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;</span>
+<span class="highlight">&lt;plist version="1.0"&gt;</span>
+  <span class="highlight">&lt;dict&gt;</span>
+    <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadDisplayName<span style="color:#ff6b6b;">&lt;/key&gt;</span>
+    <span style="color:#00d4ff;">&lt;string&gt;</span>${displayName}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadDescription<span style="color:#ff6b6b;">&lt;/key&gt;</span>
+    <span style="color:#00d4ff;">&lt;string&gt;</span>${description}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadIdentifier<span style="color:#ff6b6b;">&lt;/key&gt;</span>
+    <span style="color:#00d4ff;">&lt;string&gt;</span>${identifier}.{UDID}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadContent<span style="color:#ff6b6b;">&lt;/key&gt;</span>
+    <span style="color:#00d4ff;">&lt;array&gt;</span>
+      ${content.substring(0, 200)}${content.length > 200 ? '...' : ''}
+    <span style="color:#00d4ff;">&lt;/array&gt;</span>
+  <span class="highlight">&lt;/dict&gt;</span>
+<span class="highlight">&lt;/plist&gt;</span>
+            `;
+        }
+
+        // Tự động update preview khi thay đổi
+        document.getElementById('payloadDisplayName').addEventListener('input', updatePreview);
+        document.getElementById('payloadDescription').addEventListener('input', updatePreview);
+        document.getElementById('payloadIdentifier').addEventListener('input', updatePreview);
+        document.getElementById('payloadContent').addEventListener('input', updatePreview);
+
+        // ============================================================
+        // CREATE KEY
+        // ============================================================
         function createKey() {
-            const packageName = document.getElementById('packageSelect').value;
+            const filename = document.getElementById('filename').value.trim() || 'Config.mobileconfig';
+            const payloadDisplayName = document.getElementById('payloadDisplayName').value.trim() || 'Configplist OptiSystem⚡️';
+            const payloadDescription = document.getElementById('payloadDescription').value.trim() || 'DUCLAM.NET';
+            const payloadIdentifier = document.getElementById('payloadIdentifier').value.trim() || 'com.duclam.config';
+            const payloadContent = document.getElementById('payloadContent').value.trim();
             const expiresDays = parseInt(document.getElementById('expiryDays').value) || 365;
             const maxDevices = parseInt(document.getElementById('maxDevices').value) || 1;
             const msg = document.getElementById('createMsg');
@@ -185,13 +286,11 @@
                 return;
             }
 
-            const features = {};
-            document.querySelectorAll('.feature-chk:checked').forEach(chk => {
-                features[chk.value] = true;
-            });
-
-            const dnsText = document.getElementById('customDns').value.trim();
-            const customDns = dnsText ? dnsText.split('\n').map(s => s.trim()).filter(s => s) : [];
+            if (!payloadContent) {
+                msg.className = 'msg error';
+                msg.textContent = '⚠️ Please enter Payload Content!';
+                return;
+            }
 
             fetch('/api/create-key', {
                 method: 'POST',
@@ -200,11 +299,13 @@
                     'Authorization': 'Bearer ' + currentAdmin
                 },
                 body: JSON.stringify({
-                    package: packageName,
+                    filename: filename,
+                    payloadDisplayName: payloadDisplayName,
+                    payloadDescription: payloadDescription,
+                    payloadIdentifier: payloadIdentifier,
+                    payloadContent: payloadContent,
                     expiresDays: expiresDays,
-                    maxDevices: maxDevices,
-                    features: features,
-                    customDns: customDns
+                    maxDevices: maxDevices
                 })
             })
             .then(res => res.json())
@@ -224,6 +325,9 @@
             });
         }
 
+        // ============================================================
+        // LOAD KEYS
+        // ============================================================
         function loadKeys() {
             if (!currentAdmin) return;
 
@@ -246,15 +350,14 @@
                     const isExpired = new Date(k.expiresAt) < new Date();
                     const statusClass = isExpired ? 'expired' : 'active';
                     const statusText = isExpired ? 'Expired' : 'Active';
-                    const isFull = k.usedDevices.length >= k.maxDevices;
-                    const fullText = isFull ? ' 🔴 Full' : '';
+                    const filename = k.customConfig?.filename || 'Config.mobileconfig';
 
                     html += `
                     <div class="key-item">
                         <div>
                             <div class="code">${k.keyCode}</div>
                             <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">
-                                ${k.package.toUpperCase()} · ${k.usedDevices.length}/${k.maxDevices} devices${fullText}
+                                📄 ${filename} · ${k.usedDevices.length}/${k.maxDevices} devices
                                 · Expires: ${new Date(k.expiresAt).toLocaleDateString('vi-VN')}
                             </div>
                         </div>
@@ -272,6 +375,9 @@
             });
         }
 
+        // ============================================================
+        // DELETE KEY
+        // ============================================================
         function deleteKey(keyCode) {
             if (!confirm('Delete key ' + keyCode + '?')) return;
 
@@ -293,6 +399,11 @@
             })
             .catch(() => alert('Connection error!'));
         }
+
+        // ============================================================
+        // KHỞI TẠO
+        // ============================================================
+        updatePreview();
     </script>
 </body>
 </html>
