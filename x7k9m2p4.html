@@ -6,7 +6,6 @@
     <title>Admin Panel - Configplist OptiSystem⚡️</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ===== LOGIN & DASHBOARD ===== */
         .ip-display {
             background: rgba(255,255,255,0.02);
             padding: 8px 14px;
@@ -295,7 +294,7 @@
 
         <div class="glow-divider"></div>
 
-        <!-- ===== LOGIN ===== -->
+        <!-- LOGIN -->
         <div id="login-box">
             <div class="form-group">
                 <label>👤 Username</label>
@@ -309,7 +308,7 @@
             <div id="loginMsg" class="login-error"></div>
         </div>
 
-        <!-- ===== DASHBOARD ===== -->
+        <!-- DASHBOARD -->
         <div id="dashboard" class="hidden">
             <!-- Quota -->
             <div class="quota">
@@ -327,19 +326,19 @@
             <div style="border-top:1px solid rgba(255,255,255,0.03);padding-top:16px;">
                 <h2 style="font-size:15px;color:#e0e0e0;margin-bottom:12px;font-weight:600;">🔑 Create Key</h2>
 
-                <!-- 1. Filename -->
+                <!-- Filename -->
                 <div class="form-group">
                     <label>📄 Filename</label>
                     <input type="text" id="filename" value="Config.mobileconfig" placeholder="VD: Config_VIP.mobileconfig">
                 </div>
 
-                <!-- 2. Payload Display Name -->
+                <!-- Payload Display Name -->
                 <div class="form-group">
                     <label>📛 Payload Display Name</label>
                     <input type="text" id="payloadDisplayName" value="Configplist OptiSystem⚡️" placeholder="Tên hiển thị khi cài">
                 </div>
 
-                <!-- 3. Payload Description (QUAN TRỌNG - Sửa tên admin ở đây) -->
+                <!-- Payload Description -->
                 <div class="form-group">
                     <label>📝 Payload Description (Tên Admin + Zalo)</label>
                     <input type="text" id="payloadDescription" value="DUCLAM.NET - Lam | Zalo: 0879072010" placeholder="VD: DUCLAM.NET - Lam | Zalo: 0879072010">
@@ -348,13 +347,13 @@
                     </div>
                 </div>
 
-                <!-- 4. Payload Identifier -->
+                <!-- Payload Identifier -->
                 <div class="form-group">
                     <label>🔗 Payload Identifier</label>
                     <input type="text" id="payloadIdentifier" value="com.duclam.config" placeholder="VD: com.duclam.config">
                 </div>
 
-                <!-- 5. Payload Content (GIỮ NGUYÊN, KHÔNG SỬA) -->
+                <!-- Payload Content (GIỮ NGUYÊN) -->
                 <div class="form-group">
                     <label>📦 Payload Content (XML) - <span style="color:rgba(255,100,100,0.4);">KHÔNG SỬA</span></label>
                     <textarea id="payloadContent" placeholder="Nội dung cấu hình..."><dict>
@@ -403,7 +402,7 @@
                     </div>
                 </div>
 
-                <!-- 6. Bonus Link -->
+                <!-- Bonus Link -->
                 <div class="form-group">
                     <label>🔗 Bonus Link (Tặng kèm file)</label>
                     <input type="url" id="bonusLink" placeholder="https://www.mediafire.com/file/..." value="">
@@ -414,7 +413,7 @@
                     </div>
                 </div>
 
-                <!-- 7. Expiry + Number of Keys -->
+                <!-- Expiry + Number of Keys -->
                 <div class="quantity-row">
                     <div class="form-group">
                         <label>⏳ Expiry (days)</label>
@@ -426,7 +425,7 @@
                     </div>
                 </div>
 
-                <!-- 8. Max Devices -->
+                <!-- Max Devices -->
                 <div class="form-group">
                     <label>📱 Max Devices per Key</label>
                     <input type="number" id="maxDevices" value="1" min="1" max="999">
@@ -435,11 +434,11 @@
                     </div>
                 </div>
 
-                <!-- 9. Create Button -->
+                <!-- Create Button -->
                 <button class="btn btn-primary" onclick="createKey()">Create Key(s)</button>
                 <div id="createMsg" class="msg"></div>
                 
-                <!-- Hiển thị key vừa tạo -->
+                <!-- Key Result -->
                 <div class="key-result" id="keyResult"></div>
 
                 <!-- Preview -->
