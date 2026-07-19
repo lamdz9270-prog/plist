@@ -68,22 +68,44 @@
             background: rgba(123,97,255,0.05);
             box-shadow: 0 0 25px rgba(123,97,255,0.08);
         }
-        textarea { min-height: 100px; resize: vertical; }
-        .bonus-upload {
-            border: 2px dashed rgba(255,255,255,0.1);
+        textarea { min-height: 120px; resize: vertical; }
+        .bonus-link {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
             border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: rgba(255,255,255,0.3);
+            padding: 16px;
+            margin-top: 4px;
         }
-        .bonus-upload:hover {
-            border-color: rgba(0,212,255,0.3);
-            background: rgba(0,212,255,0.02);
+        .bonus-link .hint {
+            font-size: 11px;
+            color: rgba(255,255,255,0.2);
+            margin-top: 6px;
         }
-        .bonus-upload .file-name { color: #00d4ff; font-weight: 600; }
-        .bonus-upload input[type="file"] { display: none; }
+        .quantity-row {
+            display: flex;
+            gap: 12px;
+        }
+        .quantity-row .form-group {
+            flex: 1;
+        }
+        .key-result {
+            background: rgba(0,212,255,0.05);
+            border: 1px solid rgba(0,212,255,0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+            color: #00d4ff;
+            display: none;
+        }
+        .key-result .key-item-result {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .key-result .key-item-result:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -136,7 +158,7 @@
 
                 <div class="form-group">
                     <label>📝 Payload Description</label>
-                    <input type="text" id="payloadDescription" value="DUCLAM.NET" placeholder="Mô tả cấu hình">
+                    <input type="text" id="payloadDescription" value="DUCLAM.NET - Lam | Zalo: 0879072010" placeholder="Mô tả cấu hình">
                 </div>
 
                 <div class="form-group">
@@ -144,44 +166,52 @@
                     <input type="text" id="payloadIdentifier" value="com.duclam.config" placeholder="VD: com.duclam.config">
                 </div>
 
+                <!-- 🔥 PAYLOAD CONTENT - GIỮ NGUYÊN, ADMIN KHÔNG CẦN SỬA -->
                 <div class="form-group">
-                    <label>📦 Payload Content (XML)</label>
+                    <label>📦 Payload Content (XML) - GIỮ NGUYÊN</label>
                     <textarea id="payloadContent" placeholder="Nội dung cấu hình..."></textarea>
-                    <div style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:4px;">
-                        💡 Biến: <code>{KEY}</code> - Key · <code>{UDID}</code> - UDID · <code>{ADMIN}</code> - Admin · <code>{ZALO}</code> - Zalo · <code>{DATE}</code> - Ngày tạo
+                    <div style="font-size:11px;color:rgba(255,255,255,0.15);margin-top:4px;">
+                        ⚠️ Không cần sửa nội dung này. Chỉ cần thay tên trong Payload Description.
                     </div>
                 </div>
 
-                <!-- TẶNG KÈM FILE -->
+                <!-- 🔥 BONUS LINK -->
                 <div class="form-group">
-                    <label>📎 Bonus File (Tặng kèm)</label>
-                    <div class="bonus-upload" id="bonusDrop" onclick="document.getElementById('bonusFileInput').click()">
-                        <div style="font-size:32px;margin-bottom:8px;">📁</div>
-                        <div>Click to upload bonus file</div>
-                        <div style="font-size:12px;margin-top:4px;color:rgba(255,255,255,0.15);">
-                            Max 10MB · Any file type
+                    <label>🔗 Bonus Link (Tặng kèm file)</label>
+                    <input type="url" id="bonusLink" placeholder="https://www.mediafire.com/file/..." value="">
+                    <div class="bonus-link">
+                        <div style="font-size:12px;color:rgba(255,255,255,0.2);">
+                            📎 Dán link tải file (MediaFire, Google Drive, v.v.)
                         </div>
-                        <div class="file-name" id="bonusFileName">No file selected</div>
-                        <input type="file" id="bonusFileInput" onchange="uploadBonusFile(this)">
+                    </div>
+                </div>
+
+                <!-- THỜI HẠN + SỐ LƯỢNG KEY -->
+                <div class="quantity-row">
+                    <div class="form-group">
+                        <label>⏳ Expiry (days)</label>
+                        <input type="number" id="expiryDays" value="365" min="1" max="9999">
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 Number of Keys</label>
+                        <input type="number" id="keyCount" value="1" min="1" max="100">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>⏳ Expiry (days)</label>
-                    <input type="number" id="expiryDays" value="365" min="1" max="9999">
-                </div>
-
-                <div class="form-group">
-                    <label>📱 Max Devices</label>
+                    <label>📱 Max Devices per Key</label>
                     <input type="number" id="maxDevices" value="1" min="1" max="999">
                     <div style="font-size:11px;color:rgba(255,255,255,0.15);margin-top:4px;">
                         🔒 Key will be locked after first use
                     </div>
                 </div>
 
-                <button class="btn btn-primary" onclick="createKey()">Create Key</button>
+                <button class="btn btn-primary" onclick="createKey()">Create Key(s)</button>
                 <div id="createMsg" class="msg"></div>
                 
+                <!-- Hiển thị danh sách key vừa tạo -->
+                <div class="key-result" id="keyResult"></div>
+
                 <div class="config-preview" id="configPreview">
                     <span style="color:rgba(255,255,255,0.2);">📄 Preview config will appear here...</span>
                 </div>
@@ -204,7 +234,6 @@
     <script>
         let currentAdmin = null;
         let adminIp = '';
-        let uploadedBonusFile = '';
 
         // ============================================================
         // ADMIN LOGIN
@@ -257,39 +286,6 @@
         }
 
         // ============================================================
-        // UPLOAD BONUS FILE
-        // ============================================================
-        function uploadBonusFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            if (file.size > 10 * 1024 * 1024) {
-                alert('File too large! Max 10MB.');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            fetch('/api/upload-bonus', {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + currentAdmin },
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    uploadedBonusFile = data.filename;
-                    document.getElementById('bonusFileName').textContent = '✅ ' + data.filename;
-                    document.getElementById('bonusFileName').style.color = '#00d4ff';
-                } else {
-                    alert('Upload failed!');
-                }
-            })
-            .catch(() => alert('Upload error!'));
-        }
-
-        // ============================================================
         // PREVIEW CONFIG
         // ============================================================
         function updatePreview() {
@@ -335,7 +331,10 @@
             const payloadContent = document.getElementById('payloadContent').value.trim();
             const expiresDays = parseInt(document.getElementById('expiryDays').value) || 365;
             const maxDevices = parseInt(document.getElementById('maxDevices').value) || 1;
+            const keyCount = parseInt(document.getElementById('keyCount').value) || 1;
+            const bonusLink = document.getElementById('bonusLink').value.trim();
             const msg = document.getElementById('createMsg');
+            const resultDiv = document.getElementById('keyResult');
 
             if (!currentAdmin) {
                 msg.className = 'msg error';
@@ -349,41 +348,65 @@
                 return;
             }
 
-            fetch('/api/create-key', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + currentAdmin
-                },
-                body: JSON.stringify({
-                    filename: filename,
-                    payloadDisplayName: payloadDisplayName,
-                    payloadDescription: payloadDescription,
-                    payloadIdentifier: payloadIdentifier,
-                    payloadContent: payloadContent,
-                    expiresDays: expiresDays,
-                    maxDevices: maxDevices,
-                    bonusFile: uploadedBonusFile
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    msg.className = 'msg success';
-                    msg.textContent = '✅ Key created: ' + data.key.keyCode + ' | Bonus: ' + (uploadedBonusFile || 'None');
-                    uploadedBonusFile = '';
-                    document.getElementById('bonusFileName').textContent = 'No file selected';
-                    document.getElementById('bonusFileName').style.color = 'rgba(255,255,255,0.3)';
-                    loadKeys();
-                } else {
-                    msg.className = 'msg error';
-                    msg.textContent = data.error || 'Error creating key!';
-                }
-            })
-            .catch(() => {
+            const quotaLeft = parseInt(document.getElementById('keyQuota').textContent) - parseInt(document.getElementById('keysUsed').textContent);
+            if (keyCount > quotaLeft) {
                 msg.className = 'msg error';
-                msg.textContent = 'Connection error!';
-            });
+                msg.textContent = `⚠️ Not enough quota! (${quotaLeft} left)`;
+                return;
+            }
+
+            let createdKeys = [];
+            let totalCreated = 0;
+
+            function createNext() {
+                if (totalCreated >= keyCount) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = createdKeys.map(k => 
+                        `<div class="key-item-result">✅ ${k}</div>`
+                    ).join('');
+                    
+                    msg.className = 'msg success';
+                    msg.textContent = `✅ Created ${createdKeys.length} key(s) successfully!`;
+                    document.getElementById('bonusLink').value = '';
+                    loadKeys();
+                    return;
+                }
+
+                fetch('/api/create-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + currentAdmin
+                    },
+                    body: JSON.stringify({
+                        filename: filename,
+                        payloadDisplayName: payloadDisplayName,
+                        payloadDescription: payloadDescription,
+                        payloadIdentifier: payloadIdentifier,
+                        payloadContent: payloadContent,
+                        expiresDays: expiresDays,
+                        maxDevices: maxDevices,
+                        bonusFile: bonusLink || ''
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        createdKeys.push(data.key.keyCode);
+                        totalCreated++;
+                        createNext();
+                    } else {
+                        msg.className = 'msg error';
+                        msg.textContent = '❌ ' + (data.error || 'Error creating key!');
+                    }
+                })
+                .catch(() => {
+                    msg.className = 'msg error';
+                    msg.textContent = '❌ Connection error!';
+                });
+            }
+
+            createNext();
         }
 
         // ============================================================
