@@ -7,8 +7,9 @@ import random
 import string
 from datetime import datetime, timedelta
 import uuid
-import cgi
 import shutil
+import email
+from io import BytesIO
 
 # ============================================================
 # THÔNG TIN MASTER
@@ -75,6 +76,50 @@ def admin_login_check(username, password, ip):
     return {"success": True, "admin": admin}
 
 # ============================================================
+# HÀM XỬ LÝ MULTIPART FORM DATA (KHÔNG DÙNG CGI)
+# ============================================================
+def parse_multipart(content_type, body):
+    """Parse multipart/form-data manually"""
+    if not content_type or not body:
+        return None
+    
+    boundary = content_type.split("boundary=")[-1].strip()
+    if not boundary:
+        return None
+    
+    parts = body.split(("--" + boundary).encode())
+    result = None
+    
+    for part in parts:
+        if not part.strip() or b"filename=" not in part:
+            continue
+        
+        # Tìm filename
+        lines = part.split(b"\r\n")
+        filename = None
+        file_data = None
+        in_headers = True
+        data_lines = []
+        
+        for line in lines:
+            if in_headers:
+                if line.startswith(b"Content-Disposition:") and b"filename=" in line:
+                    filename = line.split(b"filename=")[-1].strip(b'"').decode()
+                if not line.strip():
+                    in_headers = False
+                continue
+            else:
+                if line.strip():
+                    data_lines.append(line)
+        
+        if filename and data_lines:
+            file_data = b"\r\n".join(data_lines)
+            result = {"filename": filename, "data": file_data}
+            break
+    
+    return result
+
+# ============================================================
 # HÀM XỬ LÝ KEY
 # ============================================================
 def create_key(admin_username, custom_config, bonus_file=""):
@@ -86,7 +131,6 @@ def create_key(admin_username, custom_config, bonus_file=""):
     
     key_code = generate_key()
     
-    # 🔥 ĐẢM BẢO CẤU HÌNH KHÔNG BỊ TRỐNG
     filename = custom_config.get("filename", "Config.mobileconfig")
     if not filename.endswith(".mobileconfig"):
         filename = "Config.mobileconfig"
@@ -103,11 +147,9 @@ def create_key(admin_username, custom_config, bonus_file=""):
     if not payload_identifier:
         payload_identifier = "com.duclam.config"
     
-    # 🔥 NỘI DUNG XML MẶC ĐỊNH NẾU ADMIN BỎ TRỐNG
     payload_content = custom_config.get("payloadContent", "")
     if not payload_content:
         payload_content = '''
-    <!-- Cấu hình DNS -->
     <dict>
         <key>PayloadType</key>
         <string>com.apple.dnsProxy.managed</string>
@@ -124,7 +166,6 @@ def create_key(admin_username, custom_config, bonus_file=""):
             </array>
         </dict>
     </dict>
-    <!-- Thông tin key -->
     <dict>
         <key>PayloadType</key>
         <string>com.apple.generic.managed</string>
@@ -256,7 +297,6 @@ def generate_mobile_config(key_data, udid):
     identifier = config.get("payloadIdentifier", "com.duclam.config")
     custom_content = config.get("payloadContent", "")
     
-    # Thay thế biến động
     custom_content = custom_content.replace("{KEY}", key_data["keyCode"])
     custom_content = custom_content.replace("{UDID}", udid)
     custom_content = custom_content.replace("{ADMIN}", key_data["adminInfo"]["name"])
@@ -362,7 +402,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         
-        # Upload bonus file
+        # 🔥 XỬ LÝ UPLOAD FILE (KHÔNG DÙNG CGI)
         if path == "/api/upload-bonus":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -376,20 +416,17 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 return
             
-            form = cgi.FieldStorage(
-                fp=self.rfile,
-                headers=self.headers,
-                environ={'REQUEST_METHOD': 'POST'}
-            )
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length)
             
-            file_item = form.get("file")
-            if not file_item or not file_item.filename:
+            result = parse_multipart(content_type, body)
+            if not result:
                 self.send_response(400)
                 self.end_headers()
                 return
             
-            filename = file_item.filename
-            file_data = file_item.file.read()
+            filename = result["filename"]
+            file_data = result["data"]
             
             file_path = os.path.join(UPLOAD_DIR, filename)
             with open(file_path, "wb") as f:
@@ -523,7 +560,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # Use Key (Download Config)
+        # Use Key
         if path == "/api/use-key":
             result = use_key(
                 data.get("keyCode", ""),
