@@ -3,50 +3,460 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configplist OptiSystem⚡️</title>
+    <title>Admin Panel - Configplist OptiSystem⚡️</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ===== LOGIN & DASHBOARD ===== */
+        .ip-display {
+            background: rgba(255,255,255,0.02);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .ip-display .ip-value { color: #00d4ff; font-weight: 600; }
+        .login-error {
+            color: #ff6b81;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 8px;
+            display: none;
+        }
+        .login-error.show { display: block; }
+        .form-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.25);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            font-size: 14px;
+            color: #e0e0e0;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: rgba(123,97,255,0.3);
+            background: rgba(123,97,255,0.03);
+            box-shadow: 0 0 25px rgba(123,97,255,0.04);
+        }
+        textarea { min-height: 100px; resize: vertical; }
+        .bonus-link {
+            background: rgba(255,255,255,0.01);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 4px;
+        }
+        .bonus-link .hint {
+            font-size: 11px;
+            color: rgba(255,255,255,0.15);
+            margin-top: 4px;
+        }
+        .quantity-row {
+            display: flex;
+            gap: 12px;
+        }
+        .quantity-row .form-group { flex: 1; }
+        .key-result {
+            background: rgba(0,212,255,0.04);
+            border: 1px solid rgba(0,212,255,0.06);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+            color: #00d4ff;
+            display: none;
+        }
+        .key-result .key-item-result {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+        .key-result .key-item-result:last-child { border-bottom: none; }
+        .config-preview {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 11px;
+            color: rgba(255,255,255,0.2);
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+        .config-preview .highlight { color: rgba(0,180,255,0.3); }
+        .quota {
+            background: rgba(255,255,255,0.01);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .quota .used { color: #e0e0e0; font-weight: 500; }
+        .quota .total { color: rgba(255,255,255,0.15); }
+        .key-list { margin-top: 20px; }
+        .key-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.01);
+            border-radius: 12px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.02);
+            transition: 0.3s;
+        }
+        .key-item:hover {
+            border-color: rgba(255,255,255,0.04);
+            background: rgba(255,255,255,0.015);
+        }
+        .key-item .code {
+            font-weight: 600;
+            font-family: monospace;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        .key-item .code .bonus { font-size: 11px; color: rgba(255,255,255,0.15); }
+        .key-item .status {
+            font-size: 10px;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .key-item .status.active {
+            background: rgba(0,200,150,0.06);
+            color: #00d4aa;
+            border: 1px solid rgba(0,200,150,0.04);
+        }
+        .key-item .status.expired {
+            background: rgba(255,60,60,0.06);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,60,60,0.04);
+        }
+        .key-item .delete-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.06);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .key-item .delete-btn:hover {
+            color: #ff6b6b;
+            background: rgba(255,60,60,0.04);
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.06);
+            transform: translateY(-1px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(0,180,255,0.1), rgba(120,80,255,0.1));
+            border: 1px solid rgba(0,180,255,0.04);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(0,180,255,0.15), rgba(120,80,255,0.15));
+            border-color: rgba(0,180,255,0.06);
+        }
+        .msg {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+            border: 1px solid transparent;
+        }
+        .msg.error {
+            display: block;
+            background: rgba(255,60,60,0.04);
+            color: #ff6b6b;
+            border-color: rgba(255,60,60,0.05);
+        }
+        .msg.success {
+            display: block;
+            background: rgba(0,200,150,0.04);
+            color: #00d4aa;
+            border-color: rgba(0,200,150,0.05);
+        }
+        .hidden { display: none !important; }
+        .brand {
+            text-align: center;
+            color: rgba(255,255,255,0.02);
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.01);
+        }
+        .container {
+            max-width: 580px;
+            width: 100%;
+            background: rgba(16,16,28,0.7);
+            border-radius: 28px;
+            padding: 32px 28px;
+            border: 1px solid rgba(255,255,255,0.03);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(0,180,255,0.01), rgba(120,80,255,0.005));
+            pointer-events: none;
+        }
+        .container > * { position: relative; z-index: 1; }
+        .header { text-align: center; margin-bottom: 28px; }
+        .header .icon { font-size: 44px; margin-bottom: 4px; }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #f0f0f0;
+            letter-spacing: -0.5px;
+        }
+        .header h1 span {
+            background: linear-gradient(135deg, #00b4ff, #7b61ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .sub {
+            font-size: 12px;
+            color: rgba(255,255,255,0.12);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        .glow-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            margin: 18px 0 22px;
+        }
+        @media (max-width: 480px) {
+            .container { padding: 20px 16px; }
+            .quantity-row { flex-direction: column; gap: 0; }
+            .header h1 { font-size: 22px; }
+            .header .icon { font-size: 36px; }
+        }
+    </style>
 </head>
 <body>
     <div class="container" id="app">
         <div class="header">
             <div class="icon">⚡️</div>
-            <h1>Configplist OptiSystem⚡️</h1>
-            <div class="sub">DUCLAM.NET</div>
+            <h1>Configplist <span>OptiSystem⚡️</span></h1>
+            <div class="sub">Admin Panel</div>
         </div>
 
         <div class="glow-divider"></div>
 
-        <!-- STEP 1: NHẬP KEY -->
-        <div id="step-key">
+        <!-- ===== LOGIN ===== -->
+        <div id="login-box">
             <div class="form-group">
-                <label>🔑 License Key</label>
-                <input type="text" id="keyInput" placeholder="Enter your key..." onkeydown="if(event.key==='Enter') validateKey()">
+                <label>👤 Username</label>
+                <input type="text" id="adminUser" placeholder="Enter admin username..." onkeydown="if(event.key==='Enter') adminLogin()">
             </div>
-            <button class="btn btn-primary" onclick="validateKey()" id="btnCheck">Check Key</button>
-            <div id="msg" class="msg"></div>
+            <div class="form-group">
+                <label>🔑 Password</label>
+                <input type="password" id="adminPass" placeholder="Enter admin password..." onkeydown="if(event.key==='Enter') adminLogin()">
+            </div>
+            <button class="btn btn-primary" onclick="adminLogin()">Login</button>
+            <div id="loginMsg" class="login-error"></div>
         </div>
 
-        <!-- STEP 2: THÔNG TIN + UDID -->
-        <div id="step-udid" class="hidden">
-            <div class="info-box">
-                <div class="row"><span class="label">Key</span><span class="value" id="displayKey">---</span></div>
-                <div class="row"><span class="label">Expires</span><span class="value" id="displayExpiry">---</span></div>
-                <div class="row"><span class="label">Devices</span><span class="value" id="displayDevice">0 / 0</span></div>
-                <div class="row"><span class="label">Status</span><span class="value" id="displayStatus">Available</span></div>
+        <!-- ===== DASHBOARD ===== -->
+        <div id="dashboard" class="hidden">
+            <!-- Quota -->
+            <div class="quota">
+                <span>📦 Key Quota</span>
+                <span><span class="used" id="keysUsed">0</span> / <span class="total" id="keyQuota">0</span></span>
             </div>
 
-            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:16px 0 4px;">Enter UDID</div>
-            <div class="form-group">
-                <input type="text" id="udidInput" placeholder="VD: F2LQN1234567890ABCDEF" onkeydown="if(event.key==='Enter') generateConfig()">
+            <!-- IP Lock -->
+            <div class="ip-display">
+                <span>🔒 IP Lock</span>
+                <span class="ip-value" id="adminIp">Not set</span>
             </div>
-            <button class="btn btn-primary" onclick="generateConfig()" id="btnDownload">Download Config</button>
 
-            <div class="admin-contact">
-                Admin: <strong id="adminName">Admin</strong> · 
-                Zalo: <a href="https://zalo.me/0879072010" target="_blank" id="adminZalo">0879072010</a>
+            <!-- TẠO KEY -->
+            <div style="border-top:1px solid rgba(255,255,255,0.03);padding-top:16px;">
+                <h2 style="font-size:15px;color:#e0e0e0;margin-bottom:12px;font-weight:600;">🔑 Create Key</h2>
+
+                <!-- 1. Filename -->
+                <div class="form-group">
+                    <label>📄 Filename</label>
+                    <input type="text" id="filename" value="Config.mobileconfig" placeholder="VD: Config_VIP.mobileconfig">
+                </div>
+
+                <!-- 2. Payload Display Name -->
+                <div class="form-group">
+                    <label>📛 Payload Display Name</label>
+                    <input type="text" id="payloadDisplayName" value="Configplist OptiSystem⚡️" placeholder="Tên hiển thị khi cài">
+                </div>
+
+                <!-- 3. Payload Description (QUAN TRỌNG - Sửa tên admin ở đây) -->
+                <div class="form-group">
+                    <label>📝 Payload Description (Tên Admin + Zalo)</label>
+                    <input type="text" id="payloadDescription" value="DUCLAM.NET - Lam | Zalo: 0879072010" placeholder="VD: DUCLAM.NET - Lam | Zalo: 0879072010">
+                    <div style="font-size:10px;color:rgba(255,255,255,0.12);margin-top:3px;">
+                        ⚠️ Sửa tên admin và số Zalo ở đây
+                    </div>
+                </div>
+
+                <!-- 4. Payload Identifier -->
+                <div class="form-group">
+                    <label>🔗 Payload Identifier</label>
+                    <input type="text" id="payloadIdentifier" value="com.duclam.config" placeholder="VD: com.duclam.config">
+                </div>
+
+                <!-- 5. Payload Content (GIỮ NGUYÊN, KHÔNG SỬA) -->
+                <div class="form-group">
+                    <label>📦 Payload Content (XML) - <span style="color:rgba(255,100,100,0.4);">KHÔNG SỬA</span></label>
+                    <textarea id="payloadContent" placeholder="Nội dung cấu hình..."><dict>
+        <key>PayloadType</key>
+        <string>com.apple.dnsProxy.managed</string>
+        <key>PayloadIdentifier</key>
+        <string>com.duclam.dns</string>
+        <key>PayloadDisplayName</key>
+        <string>DNS DUCLAM</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+        <key>DNSSettings</key>
+        <dict>
+            <key>DNSAddresses</key>
+            <array>
+                <string>1.1.1.1</string>
+                <string>8.8.8.8</string>
+            </array>
+        </dict>
+    </dict>
+    <dict>
+        <key>PayloadType</key>
+        <string>com.apple.generic.managed</string>
+        <key>PayloadIdentifier</key>
+        <string>com.duclam.info</string>
+        <key>PayloadDisplayName</key>
+        <string>License Info</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+        <key>PayloadContent</key>
+        <dict>
+            <key>Key</key>
+            <string>{KEY}</string>
+            <key>UDID</key>
+            <string>{UDID}</string>
+            <key>Admin</key>
+            <string>{ADMIN}</string>
+            <key>Zalo</key>
+            <string>{ZALO}</string>
+            <key>BonusLink</key>
+            <string>{BONUS_LINK}</string>
+        </dict>
+    </dict></textarea>
+                    <div style="font-size:10px;color:rgba(255,255,255,0.1);margin-top:3px;">
+                        ⚠️ Không sửa nội dung này
+                    </div>
+                </div>
+
+                <!-- 6. Bonus Link -->
+                <div class="form-group">
+                    <label>🔗 Bonus Link (Tặng kèm file)</label>
+                    <input type="url" id="bonusLink" placeholder="https://www.mediafire.com/file/..." value="">
+                    <div class="bonus-link">
+                        <div style="font-size:12px;color:rgba(255,255,255,0.15);">
+                            📎 Dán link tải file (MediaFire, Google Drive, v.v.)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Expiry + Number of Keys -->
+                <div class="quantity-row">
+                    <div class="form-group">
+                        <label>⏳ Expiry (days)</label>
+                        <input type="number" id="expiryDays" value="365" min="1" max="9999">
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 Number of Keys</label>
+                        <input type="number" id="keyCount" value="1" min="1" max="100">
+                    </div>
+                </div>
+
+                <!-- 8. Max Devices -->
+                <div class="form-group">
+                    <label>📱 Max Devices per Key</label>
+                    <input type="number" id="maxDevices" value="1" min="1" max="999">
+                    <div style="font-size:10px;color:rgba(255,255,255,0.1);margin-top:3px;">
+                        🔒 Key bị khóa sau lần sử dụng đầu tiên
+                    </div>
+                </div>
+
+                <!-- 9. Create Button -->
+                <button class="btn btn-primary" onclick="createKey()">Create Key(s)</button>
+                <div id="createMsg" class="msg"></div>
+                
+                <!-- Hiển thị key vừa tạo -->
+                <div class="key-result" id="keyResult"></div>
+
+                <!-- Preview -->
+                <div class="config-preview" id="configPreview">
+                    <span style="color:rgba(255,255,255,0.08);">📄 Preview config...</span>
+                </div>
             </div>
-            <div style="margin-top:10px;text-align:center;">
-                <a href="#" onclick="resetApp(); return false;" style="color:rgba(255,255,255,0.2);font-size:12px;text-decoration:none;">← Enter different key</a>
+
+            <!-- DANH SÁCH KEY -->
+            <div class="key-list">
+                <h2 style="font-size:15px;color:#e0e0e0;margin-bottom:10px;font-weight:600;">📋 My Keys</h2>
+                <div id="keyList"></div>
+            </div>
+
+            <!-- Logout -->
+            <div style="margin-top:16px;text-align:center;">
+                <a href="#" onclick="adminLogout(); return false;" style="color:rgba(255,255,255,0.1);font-size:13px;text-decoration:none;">Logout</a>
             </div>
         </div>
 
@@ -54,128 +464,265 @@
     </div>
 
     <script>
-        let currentKey = '';
-        let currentKeyData = null;
+        let currentAdmin = null;
+        let adminIp = '';
 
-        function validateKey() {
-            const key = document.getElementById('keyInput').value.trim();
-            const msg = document.getElementById('msg');
+        // ============================================================
+        // ADMIN LOGIN
+        // ============================================================
+        function adminLogin() {
+            const username = document.getElementById('adminUser').value.trim();
+            const password = document.getElementById('adminPass').value.trim();
+            const msg = document.getElementById('loginMsg');
 
-            if (!key) {
-                msg.className = 'msg error';
-                msg.textContent = 'Please enter a key';
+            if (!username || !password) {
+                msg.textContent = '⚠️ Please enter username and password!';
+                msg.className = 'login-error show';
                 return;
             }
 
-            document.getElementById('btnCheck').textContent = 'Checking...';
-            document.getElementById('btnCheck').disabled = true;
+            msg.className = 'login-error';
+            msg.textContent = '';
 
-            fetch('/api/validate?key=' + encodeURIComponent(key))
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.valid) {
-                        msg.className = 'msg error';
-                        msg.textContent = data.error || 'Invalid key';
-                        document.getElementById('btnCheck').textContent = 'Check Key';
-                        document.getElementById('btnCheck').disabled = false;
-                        return;
-                    }
-
-                    currentKey = key;
-                    currentKeyData = data.key;
-
-                    document.getElementById('step-key').classList.add('hidden');
-                    document.getElementById('step-udid').classList.remove('hidden');
-
-                    document.getElementById('displayKey').textContent = key;
-                    document.getElementById('displayExpiry').textContent = new Date(data.key.expiresAt).toLocaleDateString('vi-VN');
-                    document.getElementById('displayDevice').textContent = data.key.usedDevices.length + ' / ' + data.key.maxDevices;
-                    document.getElementById('displayStatus').textContent = data.key.isUsed ? '🔴 Used' : '🟢 Available';
-                    document.getElementById('displayStatus').style.color = data.key.isUsed ? '#ff6b81' : '#00d4ff';
-                    document.getElementById('adminName').textContent = data.key.adminInfo.name || 'Admin';
-                    document.getElementById('adminZalo').textContent = data.key.adminInfo.zalo || '0879072010';
-                    document.getElementById('adminZalo').href = 'https://zalo.me/' + (data.key.adminInfo.zalo || '0879072010');
-
-                    document.getElementById('btnCheck').textContent = 'Check Key';
-                    document.getElementById('btnCheck').disabled = false;
-                    msg.className = 'msg';
-                    msg.textContent = '';
-                })
-                .catch(() => {
-                    msg.className = 'msg error';
-                    msg.textContent = 'Connection error!';
-                    document.getElementById('btnCheck').textContent = 'Check Key';
-                    document.getElementById('btnCheck').disabled = false;
-                });
-        }
-
-        function generateConfig() {
-            const udid = document.getElementById('udidInput').value.trim();
-
-            if (!udid) {
-                alert('Please enter UDID');
-                return;
-            }
-            if (!/^[0-9A-Fa-f]{40}$/.test(udid)) {
-                alert('Invalid UDID (40 hex characters)');
-                return;
-            }
-
-            if (currentKeyData.isUsed) {
-                alert('Key already used!');
-                return;
-            }
-
-            if (currentKeyData.usedDevices.find(d => d.udid === udid)) {
-                alert('UDID already registered for this key!');
-                return;
-            }
-
-            document.getElementById('btnDownload').textContent = 'Generating...';
-            document.getElementById('btnDownload').disabled = true;
-
-            fetch('/api/use-key', {
+            fetch('/api/admin-login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ keyCode: currentKey, udid: udid })
+                body: JSON.stringify({ username: username, password: password })
             })
-            .then(res => {
-                if (res.status === 200) {
-                    return res.blob();
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    currentAdmin = username;
+                    adminIp = data.ip || 'Not set';
+                    document.getElementById('login-box').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('adminIp').textContent = adminIp;
+                    loadKeys();
+                } else {
+                    msg.textContent = '❌ ' + (data.error || 'Login failed!');
+                    msg.className = 'login-error show';
                 }
-                return res.json().then(data => { throw new Error(data.error || 'Error generating config'); });
             })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = currentKeyData.customConfig?.filename || 'Config.mobileconfig';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                document.getElementById('btnDownload').textContent = 'Download Config';
-                document.getElementById('btnDownload').disabled = false;
-                validateKey();
-            })
-            .catch(err => {
-                alert('Error: ' + err.message);
-                document.getElementById('btnDownload').textContent = 'Download Config';
-                document.getElementById('btnDownload').disabled = false;
+            .catch(() => {
+                msg.textContent = '❌ Connection error!';
+                msg.className = 'login-error show';
             });
         }
 
-        function resetApp() {
-            document.getElementById('step-key').classList.remove('hidden');
-            document.getElementById('step-udid').classList.add('hidden');
-            document.getElementById('keyInput').value = '';
-            document.getElementById('udidInput').value = '';
-            document.getElementById('msg').className = 'msg';
-            document.getElementById('msg').textContent = '';
-            currentKey = '';
-            currentKeyData = null;
+        function adminLogout() {
+            currentAdmin = null;
+            document.getElementById('login-box').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
         }
+
+        // ============================================================
+        // PREVIEW CONFIG
+        // ============================================================
+        function updatePreview() {
+            const displayName = document.getElementById('payloadDisplayName').value || 'Configplist OptiSystem⚡️';
+            const description = document.getElementById('payloadDescription').value || 'DUCLAM.NET';
+            const identifier = document.getElementById('payloadIdentifier').value || 'com.duclam.config';
+            const content = document.getElementById('payloadContent').value || '<!-- Nội dung cấu hình -->';
+            
+            const preview = document.getElementById('configPreview');
+            preview.innerHTML = `
+<span class="highlight">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="highlight">&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;</span>
+<span class="highlight">&lt;plist version="1.0"&gt;</span>
+  <span class="highlight">&lt;dict&gt;</span>
+    <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadDisplayName<span style="color:#ff6b6b;">&lt;/key&gt;</span>
+    <span style="color:#00d4ff;">&lt;string&gt;</span>${displayName}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadDescription<span style="color:#ff6b6b;">&lt;/key&gt;</span>
+    <span style="color:#00d4ff;">&lt;string&gt;</span>${description}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadIdentifier<span style="color:#ff6b6b;">&lt;/key&gt;</span>
+    <span style="color:#00d4ff;">&lt;string&gt;</span>${identifier}.{UDID}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadContent<span style="color:#ff6b6b;">&lt;/key&gt;</span>
+    <span style="color:#00d4ff;">&lt;array&gt;</span>
+      ${content.substring(0, 200)}${content.length > 200 ? '...' : ''}
+    <span style="color:#00d4ff;">&lt;/array&gt;</span>
+  <span class="highlight">&lt;/dict&gt;</span>
+<span class="highlight">&lt;/plist&gt;</span>
+            `;
+        }
+
+        document.getElementById('payloadDisplayName').addEventListener('input', updatePreview);
+        document.getElementById('payloadDescription').addEventListener('input', updatePreview);
+        document.getElementById('payloadIdentifier').addEventListener('input', updatePreview);
+        document.getElementById('payloadContent').addEventListener('input', updatePreview);
+
+        // ============================================================
+        // CREATE KEY
+        // ============================================================
+        function createKey() {
+            const filename = document.getElementById('filename').value.trim() || 'Config.mobileconfig';
+            const payloadDisplayName = document.getElementById('payloadDisplayName').value.trim() || 'Configplist OptiSystem⚡️';
+            const payloadDescription = document.getElementById('payloadDescription').value.trim() || 'DUCLAM.NET';
+            const payloadIdentifier = document.getElementById('payloadIdentifier').value.trim() || 'com.duclam.config';
+            const payloadContent = document.getElementById('payloadContent').value.trim();
+            const expiresDays = parseInt(document.getElementById('expiryDays').value) || 365;
+            const maxDevices = parseInt(document.getElementById('maxDevices').value) || 1;
+            const keyCount = parseInt(document.getElementById('keyCount').value) || 1;
+            const bonusLink = document.getElementById('bonusLink').value.trim();
+            const msg = document.getElementById('createMsg');
+            const resultDiv = document.getElementById('keyResult');
+
+            if (!currentAdmin) {
+                msg.className = 'msg error';
+                msg.textContent = 'Please login again!';
+                return;
+            }
+
+            if (!payloadContent) {
+                msg.className = 'msg error';
+                msg.textContent = '⚠️ Please enter Payload Content!';
+                return;
+            }
+
+            const quotaLeft = parseInt(document.getElementById('keyQuota').textContent) - parseInt(document.getElementById('keysUsed').textContent);
+            if (keyCount > quotaLeft) {
+                msg.className = 'msg error';
+                msg.textContent = `⚠️ Not enough quota! (${quotaLeft} left)`;
+                return;
+            }
+
+            let createdKeys = [];
+            let totalCreated = 0;
+
+            function createNext() {
+                if (totalCreated >= keyCount) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = createdKeys.map(k => 
+                        `<div class="key-item-result">✅ ${k}</div>`
+                    ).join('');
+                    
+                    msg.className = 'msg success';
+                    msg.textContent = `✅ Created ${createdKeys.length} key(s) successfully!`;
+                    document.getElementById('bonusLink').value = '';
+                    loadKeys();
+                    return;
+                }
+
+                fetch('/api/create-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + currentAdmin
+                    },
+                    body: JSON.stringify({
+                        filename: filename,
+                        payloadDisplayName: payloadDisplayName,
+                        payloadDescription: payloadDescription,
+                        payloadIdentifier: payloadIdentifier,
+                        payloadContent: payloadContent,
+                        expiresDays: expiresDays,
+                        maxDevices: maxDevices,
+                        bonusFile: bonusLink || ''
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        createdKeys.push(data.key.keyCode);
+                        totalCreated++;
+                        createNext();
+                    } else {
+                        msg.className = 'msg error';
+                        msg.textContent = '❌ ' + (data.error || 'Error creating key!');
+                    }
+                })
+                .catch(() => {
+                    msg.className = 'msg error';
+                    msg.textContent = '❌ Connection error!';
+                });
+            }
+
+            createNext();
+        }
+
+        // ============================================================
+        // LOAD KEYS
+        // ============================================================
+        function loadKeys() {
+            if (!currentAdmin) return;
+
+            fetch('/api/keys', {
+                headers: { 'Authorization': 'Bearer ' + currentAdmin }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('keyList');
+                document.getElementById('keysUsed').textContent = data.used || 0;
+                document.getElementById('keyQuota').textContent = data.quota || 0;
+
+                if (!data.keys || data.keys.length === 0) {
+                    container.innerHTML = '<div style="color:rgba(255,255,255,0.1);text-align:center;padding:16px;">No keys yet</div>';
+                    return;
+                }
+
+                let html = '';
+                data.keys.forEach(k => {
+                    const isExpired = new Date(k.expiresAt) < new Date();
+                    const statusClass = isExpired ? 'expired' : 'active';
+                    const statusText = isExpired ? 'Expired' : 'Active';
+                    const isUsed = k.isUsed || k.usedDevices.length >= k.maxDevices;
+                    const usedText = isUsed ? ' 🔴 Used' : ' 🟢 Available';
+                    const filename = k.customConfig?.filename || 'Config.mobileconfig';
+                    const bonus = k.bonusFile ? ' 📎' : '';
+
+                    html += `
+                    <div class="key-item">
+                        <div>
+                            <div class="code">${k.keyCode} ${bonus}</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.15);margin-top:2px;">
+                                📄 ${filename} · ${k.usedDevices.length}/${k.maxDevices} devices${usedText}
+                                · Expires: ${new Date(k.expiresAt).toLocaleDateString('vi-VN')}
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="status ${statusClass}">${statusText}</span>
+                            <button class="delete-btn" onclick="deleteKey('${k.keyCode}')" title="Delete key">🗑️</button>
+                        </div>
+                    </div>
+                    `;
+                });
+                container.innerHTML = html;
+            })
+            .catch(() => {
+                document.getElementById('keyList').innerHTML = '<div style="color:rgba(255,255,255,0.1);text-align:center;padding:16px;">Error loading keys</div>';
+            });
+        }
+
+        // ============================================================
+        // DELETE KEY
+        // ============================================================
+        function deleteKey(keyCode) {
+            if (!confirm('Delete key ' + keyCode + '?')) return;
+
+            fetch('/api/delete-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + currentAdmin
+                },
+                body: JSON.stringify({ keyCode: keyCode })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadKeys();
+                } else {
+                    alert(data.error || 'Error deleting key!');
+                }
+            })
+            .catch(() => alert('Connection error!'));
+        }
+
+        // ============================================================
+        // KHỞI TẠO
+        // ============================================================
+        updatePreview();
     </script>
 </body>
 </html>
