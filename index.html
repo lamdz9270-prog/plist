@@ -10,31 +10,36 @@
     <div class="container" id="app">
         <div class="header">
             <div class="icon">⚡️</div>
-            <h1>Configplist OptiSystem⚡️</h1>
+            <h1>Configplist <span>OptiSystem⚡️</span></h1>
             <div class="sub">DUCLAM.NET</div>
         </div>
 
+        <div class="glow-divider"></div>
+
+        <!-- STEP 1: NHẬP KEY -->
         <div id="step-key">
             <div class="form-group">
-                <label>License Key</label>
-                <input type="text" id="keyInput" placeholder="VD: A1B2C3D4" onkeydown="if(event.key==='Enter') validateKey()">
+                <label>🔑 License Key</label>
+                <input type="text" id="keyInput" placeholder="Enter your key..." onkeydown="if(event.key==='Enter') validateKey()">
             </div>
-            <button class="btn" onclick="validateKey()" id="btnCheck">Check Key</button>
+            <button class="btn btn-primary" onclick="validateKey()" id="btnCheck">Check Key</button>
             <div id="msg" class="msg"></div>
         </div>
 
+        <!-- STEP 2: THÔNG TIN + UDID -->
         <div id="step-udid" class="hidden">
             <div class="info-box">
                 <div class="row"><span class="label">Key</span><span class="value" id="displayKey">---</span></div>
                 <div class="row"><span class="label">Expires</span><span class="value" id="displayExpiry">---</span></div>
                 <div class="row"><span class="label">Devices</span><span class="value" id="displayDevice">0 / 0</span></div>
+                <div class="row"><span class="label">Status</span><span class="value" id="displayStatus">Available</span></div>
             </div>
 
             <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:16px 0 4px;">Enter UDID</div>
             <div class="form-group">
                 <input type="text" id="udidInput" placeholder="VD: F2LQN1234567890ABCDEF" onkeydown="if(event.key==='Enter') generateConfig()">
             </div>
-            <button class="btn" onclick="generateConfig()" id="btnDownload">Download Config</button>
+            <button class="btn btn-primary" onclick="generateConfig()" id="btnDownload">Download Config</button>
 
             <div class="admin-contact">
                 Admin: <strong id="adminName">Admin</strong> · 
@@ -85,6 +90,8 @@
                     document.getElementById('displayKey').textContent = key;
                     document.getElementById('displayExpiry').textContent = new Date(data.key.expiresAt).toLocaleDateString('vi-VN');
                     document.getElementById('displayDevice').textContent = data.key.usedDevices.length + ' / ' + data.key.maxDevices;
+                    document.getElementById('displayStatus').textContent = data.key.isUsed ? '🔴 Used' : '🟢 Available';
+                    document.getElementById('displayStatus').style.color = data.key.isUsed ? '#ff6b6b' : '#00d4aa';
                     document.getElementById('adminName').textContent = data.key.adminInfo.name || 'Admin';
                     document.getElementById('adminZalo').textContent = data.key.adminInfo.zalo || '0879072010';
                     document.getElementById('adminZalo').href = 'https://zalo.me/' + (data.key.adminInfo.zalo || '0879072010');
@@ -111,6 +118,11 @@
             }
             if (!/^[0-9A-Fa-f]{40}$/.test(udid)) {
                 alert('Invalid UDID (40 hex characters)');
+                return;
+            }
+
+            if (currentKeyData.isUsed) {
+                alert('Key already used!');
                 return;
             }
 
