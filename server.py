@@ -146,7 +146,6 @@ def create_key(admin_username, custom_config, bonus_file=""):
         payload_identifier = "com.duclam.config"
     
     payload_content = custom_config.get("payloadContent", "")
-    # 🔥 Nếu payload trống, dùng mặc định (không để trống)
     if not payload_content:
         payload_content = '''
     <dict>
@@ -290,7 +289,7 @@ def delete_key(key_code, admin_username):
     return {"success": True}
 
 # ============================================================
-# HÀM TẠO FILE .MOBILECONFIG (KHÔNG SỬA PAYLOAD)
+# HÀM TẠO FILE .MOBILECONFIG
 # ============================================================
 def generate_mobile_config(key_data, udid):
     config = key_data.get("customConfig", {})
@@ -300,13 +299,14 @@ def generate_mobile_config(key_data, udid):
     identifier = config.get("payloadIdentifier", "com.duclam.config")
     custom_content = config.get("payloadContent", "")
     
-    # 🔥 CHỈ THAY THẾ BIẾN, KHÔNG SỬA NỘI DUNG PAYLOAD
+    # 🔥 THAY THẾ TẤT CẢ BIẾN
     custom_content = custom_content.replace("{KEY}", key_data["keyCode"])
     custom_content = custom_content.replace("{UDID}", udid)
     custom_content = custom_content.replace("{ADMIN}", key_data["adminInfo"]["name"])
     custom_content = custom_content.replace("{ZALO}", key_data["adminInfo"]["zalo"])
     custom_content = custom_content.replace("{DATE}", datetime.now().strftime("%Y-%m-%d"))
     custom_content = custom_content.replace("{BONUS_LINK}", key_data.get("bonusFile", "No bonus file"))
+    custom_content = custom_content.replace("{UUID}", str(uuid.uuid4()))  # 🔥 THÊM DÒNG NÀY
     
     uuid_str = str(uuid.uuid4())
     
@@ -317,7 +317,7 @@ def generate_mobile_config(key_data, udid):
     <key>PayloadDisplayName</key>
     <string>{display_name}</string>
     <key>PayloadDescription</key>
-    <string>{description}</string>
+    <string>{description} | Key: {key_data["keyCode"]} | Expires: {key_data["expiresAt"].split('T')[0]}</string>
     <key>PayloadIdentifier</key>
     <string>{identifier}.{udid}</string>
     <key>PayloadType</key>
