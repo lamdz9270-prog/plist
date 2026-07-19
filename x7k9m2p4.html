@@ -40,12 +40,8 @@
             white-space: pre-wrap;
             word-break: break-all;
         }
-        .config-preview .highlight {
-            color: #00d4ff;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .config-preview .highlight { color: #00d4ff; }
+        .form-group { margin-bottom: 16px; }
         label {
             display: block;
             font-size: 12px;
@@ -72,9 +68,26 @@
             background: rgba(123,97,255,0.05);
             box-shadow: 0 0 25px rgba(123,97,255,0.08);
         }
-        textarea {
-            min-height: 100px;
-            resize: vertical;
+        textarea { min-height: 100px; resize: vertical; }
+        .bonus-upload {
+            border: 2px dashed rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: rgba(255,255,255,0.3);
+        }
+        .bonus-upload:hover {
+            border-color: rgba(0,212,255,0.3);
+            background: rgba(0,212,255,0.02);
+        }
+        .bonus-upload .file-name {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+        .bonus-upload input[type="file"] {
+            display: none;
         }
     </style>
 </head>
@@ -96,7 +109,7 @@
                 <label>🔑 Password</label>
                 <input type="password" id="adminPass" placeholder="Enter admin password..." onkeydown="if(event.key==='Enter') adminLogin()">
             </div>
-            <button class="btn" onclick="adminLogin()">Login</button>
+            <button class="btn btn-primary" onclick="adminLogin()">Login</button>
             <div id="loginMsg" class="login-error"></div>
         </div>
 
@@ -112,7 +125,7 @@
                 <span class="ip-value" id="adminIp">Not set</span>
             </div>
 
-            <!-- ===== TẠO KEY + TÙY CHỈNH CONFIG ===== -->
+            <!-- TẠO KEY -->
             <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;">
                 <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">🔑 Create Key</h2>
 
@@ -138,9 +151,23 @@
 
                 <div class="form-group">
                     <label>📦 Payload Content (XML)</label>
-                    <textarea id="payloadContent" placeholder="Nội dung cấu hình...&#10;Hỗ trợ biến: {KEY}, {UDID}, {ADMIN}, {ZALO}, {DATE}"></textarea>
+                    <textarea id="payloadContent" placeholder="Nội dung cấu hình..."></textarea>
                     <div style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:4px;">
-                        💡 Biến: <code>{KEY}</code> - Key code · <code>{UDID}</code> - UDID · <code>{ADMIN}</code> - Admin name · <code>{ZALO}</code> - Zalo · <code>{DATE}</code> - Ngày tạo
+                        💡 Biến: <code>{KEY}</code> - Key · <code>{UDID}</code> - UDID · <code>{ADMIN}</code> - Admin · <code>{ZALO}</code> - Zalo · <code>{DATE}</code> - Ngày tạo
+                    </div>
+                </div>
+
+                <!-- 🔥 TẶNG KÈM FILE -->
+                <div class="form-group">
+                    <label>📎 Bonus File (Tặng kèm)</label>
+                    <div class="bonus-upload" id="bonusDrop" onclick="document.getElementById('bonusFileInput').click()">
+                        <div style="font-size:32px;margin-bottom:8px;">📁</div>
+                        <div>Click to upload bonus file</div>
+                        <div style="font-size:12px;margin-top:4px;color:rgba(255,255,255,0.15);">
+                            Max 10MB · Any file type
+                        </div>
+                        <div class="file-name" id="bonusFileName">No file selected</div>
+                        <input type="file" id="bonusFileInput" onchange="uploadBonusFile(this)">
                     </div>
                 </div>
 
@@ -152,18 +179,20 @@
                 <div class="form-group">
                     <label>📱 Max Devices</label>
                     <input type="number" id="maxDevices" value="1" min="1" max="999">
+                    <div style="font-size:11px;color:rgba(255,255,255,0.15);margin-top:4px;">
+                        🔒 Key will be locked after first use
+                    </div>
                 </div>
 
-                <button class="btn" onclick="createKey()">Create Key</button>
+                <button class="btn btn-primary" onclick="createKey()">Create Key</button>
                 <div id="createMsg" class="msg"></div>
                 
-                <!-- Preview -->
                 <div class="config-preview" id="configPreview">
                     <span style="color:rgba(255,255,255,0.2);">📄 Preview config will appear here...</span>
                 </div>
             </div>
 
-            <!-- Danh sách key -->
+            <!-- DANH SÁCH KEY -->
             <div class="key-list">
                 <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">📋 My Keys</h2>
                 <div id="keyList"></div>
@@ -180,6 +209,7 @@
     <script>
         let currentAdmin = null;
         let adminIp = '';
+        let uploadedBonusFile = '';
 
         // ============================================================
         // ADMIN LOGIN
@@ -232,6 +262,39 @@
         }
 
         // ============================================================
+        // UPLOAD BONUS FILE
+        // ============================================================
+        function uploadBonusFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File too large! Max 10MB.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/upload-bonus', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + currentAdmin },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    uploadedBonusFile = data.filename;
+                    document.getElementById('bonusFileName').textContent = '✅ ' + data.filename;
+                    document.getElementById('bonusFileName').style.color = '#00d4ff';
+                } else {
+                    alert('Upload failed!');
+                }
+            })
+            .catch(() => alert('Upload error!'));
+        }
+
+        // ============================================================
         // PREVIEW CONFIG
         // ============================================================
         function updatePreview() {
@@ -261,7 +324,6 @@
             `;
         }
 
-        // Tự động update preview khi thay đổi
         document.getElementById('payloadDisplayName').addEventListener('input', updatePreview);
         document.getElementById('payloadDescription').addEventListener('input', updatePreview);
         document.getElementById('payloadIdentifier').addEventListener('input', updatePreview);
@@ -305,14 +367,18 @@
                     payloadIdentifier: payloadIdentifier,
                     payloadContent: payloadContent,
                     expiresDays: expiresDays,
-                    maxDevices: maxDevices
+                    maxDevices: maxDevices,
+                    bonusFile: uploadedBonusFile
                 })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     msg.className = 'msg success';
-                    msg.textContent = '✅ Key created: ' + data.key.keyCode;
+                    msg.textContent = '✅ Key created: ' + data.key.keyCode + ' | Bonus: ' + (uploadedBonusFile || 'None');
+                    uploadedBonusFile = '';
+                    document.getElementById('bonusFileName').textContent = 'No file selected';
+                    document.getElementById('bonusFileName').style.color = 'rgba(255,255,255,0.3)';
                     loadKeys();
                 } else {
                     msg.className = 'msg error';
@@ -350,14 +416,17 @@
                     const isExpired = new Date(k.expiresAt) < new Date();
                     const statusClass = isExpired ? 'expired' : 'active';
                     const statusText = isExpired ? 'Expired' : 'Active';
+                    const isUsed = k.isUsed || k.usedDevices.length >= k.maxDevices;
+                    const usedText = isUsed ? ' 🔴 Used' : ' 🟢 Available';
                     const filename = k.customConfig?.filename || 'Config.mobileconfig';
+                    const bonus = k.bonusFile ? ' 📎' : '';
 
                     html += `
                     <div class="key-item">
                         <div>
-                            <div class="code">${k.keyCode}</div>
+                            <div class="code">${k.keyCode} ${bonus}</div>
                             <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">
-                                📄 ${filename} · ${k.usedDevices.length}/${k.maxDevices} devices
+                                📄 ${filename} · ${k.usedDevices.length}/${k.maxDevices} devices${usedText}
                                 · Expires: ${new Date(k.expiresAt).toLocaleDateString('vi-VN')}
                             </div>
                         </div>
