@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configplist OptiSystem⚡️ - Master</title>
+    <title>Master Panel - Configplist OptiSystem⚡️</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +14,6 @@
             <div class="sub">Master Panel</div>
         </div>
 
-        <!-- LOGIN -->
         <div id="login-box">
             <div class="form-group">
                 <label>👤 Master Username</label>
@@ -28,62 +27,12 @@
             <div id="loginMsg" class="msg"></div>
         </div>
 
-        <!-- DASHBOARD -->
         <div id="dashboard" class="hidden">
             <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
                 <span style="font-size:14px;color:rgba(255,255,255,0.4);">Total Admins: <strong id="totalAdmins" style="color:#ff6b6b;">0</strong></span>
                 <span style="font-size:14px;color:rgba(255,255,255,0.4);">Total Keys: <strong id="totalKeys" style="color:#ff6b6b;">0</strong></span>
             </div>
 
-            <!-- ===== TẠO KEY (THÊM MỚI) ===== -->
-            <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;">
-                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">🔑 Create Key</h2>
-
-                <div class="form-group">
-                    <label>Package</label>
-                    <select id="mPackageSelect">
-                        <option value="vip">VIP</option>
-                        <option value="gold">GOLD</option>
-                        <option value="free">FREE</option>
-                        <option value="premium">PREMIUM</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Expiry (days)</label>
-                    <input type="number" id="mExpiryDays" value="365" min="1" max="9999">
-                </div>
-
-                <div class="form-group">
-                    <label>Max Devices</label>
-                    <input type="number" id="mMaxDevices" value="1" min="1" max="999">
-                </div>
-
-                <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);margin:12px 0 4px;">Features</div>
-                <div class="feature-grid">
-                    <label><input type="checkbox" class="m-feature-chk" value="battery" checked> 🔋 Battery</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="fps_boost" checked> ⚡ FPS</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="reduce_lag" checked> 🌐 DNS</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="ad_block" checked> 🚫 AdBlock</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="network_optimize"> 📶 Wi-Fi</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="ram_clean"> 🧹 RAM</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="cache_clean"> 🗑️ Cache</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="head_track"> 🎯 Head</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="fix_recoil"> 🔫 Recoil</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="light_scope"> ⚖️ Scope</label>
-                    <label><input type="checkbox" class="m-feature-chk" value="body_track"> 🎯 Body</label>
-                </div>
-
-                <div class="form-group">
-                    <label>Custom DNS (1 per line)</label>
-                    <textarea id="mCustomDns" rows="2" placeholder="1.1.1.1&#10;8.8.8.8"></textarea>
-                </div>
-
-                <button class="btn" onclick="masterCreateKey()">Create Key</button>
-                <div id="mCreateMsg" class="msg"></div>
-            </div>
-
-            <!-- ===== TẠO ADMIN CON ===== -->
             <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;">
                 <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:12px;">➕ Create Admin</h2>
 
@@ -112,13 +61,6 @@
                 <div id="createMsg" class="msg"></div>
             </div>
 
-            <!-- ===== DANH SÁCH KEY ===== -->
-            <div class="key-list" style="margin-top:20px;">
-                <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">📋 All Keys</h2>
-                <div id="mKeyList"></div>
-            </div>
-
-            <!-- ===== DANH SÁCH ADMIN ===== -->
             <div class="key-list" style="margin-top:20px;">
                 <h2 style="font-size:16px;color:#e0e0e0;margin-bottom:10px;">📋 Admin List</h2>
                 <div id="adminList"></div>
@@ -135,9 +77,6 @@
     <script>
         let masterToken = null;
 
-        // ============================================================
-        // MASTER LOGIN
-        // ============================================================
         function masterLogin() {
             const username = document.getElementById('masterUser').value.trim();
             const password = document.getElementById('masterPass').value.trim();
@@ -162,7 +101,6 @@
                     document.getElementById('dashboard').classList.remove('hidden');
                     msg.className = 'msg';
                     msg.textContent = '';
-                    loadAllKeys();
                     loadAdmins();
                 } else {
                     msg.className = 'msg error';
@@ -182,141 +120,6 @@
             document.getElementById('masterPass').value = '';
         }
 
-        // ============================================================
-        // MASTER CREATE KEY (THÊM MỚI)
-        // ============================================================
-        function masterCreateKey() {
-            const packageName = document.getElementById('mPackageSelect').value;
-            const expiresDays = parseInt(document.getElementById('mExpiryDays').value) || 365;
-            const maxDevices = parseInt(document.getElementById('mMaxDevices').value) || 1;
-            const msg = document.getElementById('mCreateMsg');
-
-            if (!masterToken) {
-                msg.className = 'msg error';
-                msg.textContent = 'Please login again!';
-                return;
-            }
-
-            const features = {};
-            document.querySelectorAll('.m-feature-chk:checked').forEach(chk => {
-                features[chk.value] = true;
-            });
-
-            const dnsText = document.getElementById('mCustomDns').value.trim();
-            const customDns = dnsText ? dnsText.split('\n').map(s => s.trim()).filter(s => s) : [];
-
-            fetch('/api/create-key', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + masterToken
-                },
-                body: JSON.stringify({
-                    package: packageName,
-                    expiresDays: expiresDays,
-                    maxDevices: maxDevices,
-                    features: features,
-                    customDns: customDns
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    msg.className = 'msg success';
-                    msg.textContent = '✅ Key created: ' + data.key.keyCode;
-                    loadAllKeys();
-                } else {
-                    msg.className = 'msg error';
-                    msg.textContent = data.error || 'Error creating key!';
-                }
-            })
-            .catch(() => {
-                msg.className = 'msg error';
-                msg.textContent = 'Connection error!';
-            });
-        }
-
-        // ============================================================
-        // MASTER DELETE KEY
-        // ============================================================
-        function masterDeleteKey(keyCode) {
-            if (!confirm('Delete key ' + keyCode + '?')) return;
-
-            fetch('/api/delete-key', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + masterToken
-                },
-                body: JSON.stringify({ keyCode: keyCode })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    loadAllKeys();
-                } else {
-                    alert(data.error || 'Error deleting key!');
-                }
-            })
-            .catch(() => alert('Connection error!'));
-        }
-
-        // ============================================================
-        // LOAD ALL KEYS
-        // ============================================================
-        function loadAllKeys() {
-            if (!masterToken) return;
-
-            fetch('/api/keys', {
-                headers: { 'Authorization': 'Bearer ' + masterToken }
-            })
-            .then(res => res.json())
-            .then(data => {
-                const container = document.getElementById('mKeyList');
-
-                // Cập nhật tổng key
-                document.getElementById('totalKeys').textContent = data.keys ? data.keys.length : 0;
-
-                if (!data.keys || data.keys.length === 0) {
-                    container.innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">No keys yet</div>';
-                    return;
-                }
-
-                let html = '';
-                data.keys.forEach(k => {
-                    const isExpired = new Date(k.expiresAt) < new Date();
-                    const statusClass = isExpired ? 'expired' : 'active';
-                    const statusText = isExpired ? 'Expired' : 'Active';
-                    const isFull = k.usedDevices.length >= k.maxDevices;
-                    const fullText = isFull ? ' 🔴 Full' : '';
-
-                    html += `
-                    <div class="key-item">
-                        <div>
-                            <div class="code">${k.keyCode}</div>
-                            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">
-                                ${k.package.toUpperCase()} · ${k.usedDevices.length}/${k.maxDevices} devices${fullText}
-                                · Expires: ${new Date(k.expiresAt).toLocaleDateString('vi-VN')}
-                                · Created by: ${k.createdBy}
-                            </div>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <span class="status ${statusClass}">${statusText}</span>
-                            <button class="delete-btn" onclick="masterDeleteKey('${k.keyCode}')" title="Delete key">🗑️</button>
-                        </div>
-                    </div>
-                    `;
-                });
-                container.innerHTML = html;
-            })
-            .catch(() => {
-                document.getElementById('mKeyList').innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">Error loading keys</div>';
-            });
-        }
-
-        // ============================================================
-        // CREATE ADMIN
-        // ============================================================
         function createAdmin() {
             const username = document.getElementById('newAdminUser').value.trim();
             const password = document.getElementById('newAdminPass').value.trim();
@@ -366,9 +169,6 @@
             });
         }
 
-        // ============================================================
-        // LOAD ADMINS
-        // ============================================================
         function loadAdmins() {
             if (!masterToken) return;
 
@@ -379,6 +179,10 @@
             .then(data => {
                 const container = document.getElementById('adminList');
                 document.getElementById('totalAdmins').textContent = data.admins.length;
+
+                let totalKeys = 0;
+                data.admins.forEach(a => { totalKeys += a.keysUsed || 0; });
+                document.getElementById('totalKeys').textContent = totalKeys;
 
                 if (!data.admins || data.admins.length === 0) {
                     container.innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:20px;">No admins</div>';
@@ -418,9 +222,6 @@
             });
         }
 
-        // ============================================================
-        // EDIT QUOTA
-        // ============================================================
         function editQuota(username) {
             const newQuota = prompt('Enter new quota for ' + username + ':');
             if (newQuota === null) return;
@@ -452,9 +253,6 @@
             .catch(() => alert('Connection error!'));
         }
 
-        // ============================================================
-        // DELETE ADMIN
-        // ============================================================
         function deleteAdmin(username) {
             if (!confirm('Delete admin ' + username + '? All their keys will also be deleted.')) return;
 
@@ -471,7 +269,6 @@
             .then(data => {
                 if (data.success) {
                     loadAdmins();
-                    loadAllKeys();
                 } else {
                     alert('Error deleting admin!');
                 }
