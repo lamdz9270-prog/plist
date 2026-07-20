@@ -11,38 +11,23 @@ import shutil
 import email
 from io import BytesIO
 
-# ============================================================
-# THÔNG TIN MASTER
-# ============================================================
 MASTER_USERNAME = "nguyenduclam"
 MASTER_PASSWORD = "ngduclamcute1201"
 
-# ============================================================
-# CẤU HÌNH UPLOAD
-# ============================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ============================================================
-# DATABASE
-# ============================================================
 DB = {
     "admins": [],
     "keys": [],
     "usageLogs": []
 }
 
-# ============================================================
-# HÀM TẠO KEY 8 KÝ TỰ
-# ============================================================
 def generate_key():
     chars = string.ascii_uppercase + string.digits
     return ''.join(random.choices(chars, k=8))
 
-# ============================================================
-# HÀM XỬ LÝ ADMIN
-# ============================================================
 def find_admin(username):
     for a in DB["admins"]:
         if a["username"] == username:
@@ -75,9 +60,6 @@ def admin_login_check(username, password, ip):
     admin["last_login"] = datetime.now().isoformat()
     return {"success": True, "admin": admin}
 
-# ============================================================
-# HÀM XỬ LÝ MULTIPART FORM DATA
-# ============================================================
 def parse_multipart(content_type, body):
     if not content_type or not body:
         return None
@@ -117,9 +99,6 @@ def parse_multipart(content_type, body):
     
     return result
 
-# ============================================================
-# HÀM XỬ LÝ KEY
-# ============================================================
 def create_key(admin_username, custom_config, bonus_file=""):
     admin = find_admin(admin_username)
     if not admin:
@@ -246,9 +225,6 @@ def delete_key(key_code, admin_username):
         admin["keysUsed"] = max(0, admin["keysUsed"] - 1)
     return {"success": True}
 
-# ============================================================
-# HÀM TẠO FILE .MOBILECONFIG (ĐÃ SỬA)
-# ============================================================
 def generate_mobile_config(key_data, udid):
     config = key_data.get("customConfig", {})
     
@@ -264,6 +240,7 @@ def generate_mobile_config(key_data, udid):
     custom_content = custom_content.replace("{ZALO}", key_data["adminInfo"]["zalo"])
     custom_content = custom_content.replace("{DATE}", datetime.now().strftime("%Y-%m-%d"))
     custom_content = custom_content.replace("{BONUS_LINK}", key_data.get("bonusFile", "No bonus file"))
+    custom_content = custom_content.replace("{UUID}", "00000000-0000-0000-0000-000000000000")
     
     uuid_str = str(uuid.uuid4())
     
@@ -291,9 +268,6 @@ def generate_mobile_config(key_data, udid):
 </plist>'''
     return xml
 
-# ============================================================
-# HTTP REQUEST HANDLER
-# ============================================================
 class MyHandler(SimpleHTTPRequestHandler):
     
     def do_GET(self):
@@ -364,7 +338,6 @@ class MyHandler(SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         
-        # Upload bonus file
         if path == "/api/upload-bonus":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -403,7 +376,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             }).encode())
             return
         
-        # Download bonus file
         if path.startswith("/api/download-bonus/"):
             filename = path.replace("/api/download-bonus/", "")
             file_path = os.path.join(UPLOAD_DIR, filename)
@@ -431,7 +403,6 @@ class MyHandler(SimpleHTTPRequestHandler):
         except:
             data = {}
         
-        # Admin Login
         if path == "/api/admin-login":
             username = data.get("username", "")
             password = data.get("password", "")
@@ -457,7 +428,6 @@ class MyHandler(SimpleHTTPRequestHandler):
                 }).encode())
             return
         
-        # Master Login
         if path == "/api/master-login":
             username = data.get("username", "")
             password = data.get("password", "")
@@ -473,14 +443,13 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"success": False, "error": "Invalid credentials!"}).encode())
             return
         
-        # Create Key
         if path == "/api/create-key":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
                 self.send_response(401)
                 self.end_headers()
                 return
-            username = auth.replace("Bearer ", ")
+            username = auth.replace("Bearer ", "")
             admin = find_admin(username)
             if not admin or not admin.get("isActive", True):
                 self.send_response(403)
@@ -506,7 +475,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # Delete Key
         if path == "/api/delete-key":
             auth = self.headers.get("Authorization", "")
             if not auth.startswith("Bearer "):
@@ -522,7 +490,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # Use Key
         if path == "/api/use-key":
             result = use_key(
                 data.get("keyCode", ""),
@@ -551,7 +518,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             return
         
-        # Master Create Admin
         if path == "/api/master-create-admin":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -599,7 +565,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             }).encode())
             return
         
-        # Master Delete Admin
         if path == "/api/master-delete-admin":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -618,7 +583,6 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True}).encode())
             return
         
-        # Master Update Quota
         if path == "/api/master-update-quota":
             master_user = data.get("master_username", "")
             master_pass = data.get("master_password", "")
@@ -644,14 +608,10 @@ class MyHandler(SimpleHTTPRequestHandler):
         self.send_response(404)
         self.end_headers()
 
-# ============================================================
-# CHẠY SERVER
-# ============================================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     server = HTTPServer(("0.0.0.0", port), MyHandler)
     print(f"Server running at http://0.0.0.0:{port}")
     print(f"Master: {MASTER_USERNAME}")
-    print("✅ Key format: 8 characters (e.g. A1B2C3D4)")
-    print("✅ Each key can only be used once (locked after first use)")
+    print("✅ Key format: 8 characters")
     server.serve_forever()
