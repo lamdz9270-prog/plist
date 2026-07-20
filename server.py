@@ -146,50 +146,6 @@ def create_key(admin_username, custom_config, bonus_file=""):
         payload_identifier = "com.duclam.config"
     
     payload_content = custom_config.get("payloadContent", "")
-    if not payload_content:
-        payload_content = '''
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.dnsProxy.managed</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.dns</string>
-        <key>PayloadDisplayName</key>
-        <string>DNS DUCLAM</string>
-        <key>PayloadVersion</key>
-        <integer>1</integer>
-        <key>DNSSettings</key>
-        <dict>
-            <key>DNSAddresses</key>
-            <array>
-                <string>1.1.1.1</string>
-                <string>8.8.8.8</string>
-            </array>
-        </dict>
-    </dict>
-    <dict>
-        <key>PayloadType</key>
-        <string>com.apple.generic.managed</string>
-        <key>PayloadIdentifier</key>
-        <string>com.duclam.info</string>
-        <key>PayloadDisplayName</key>
-        <string>License Info</string>
-        <key>PayloadVersion</key>
-        <integer>1</integer>
-        <key>PayloadContent</key>
-        <dict>
-            <key>Key</key>
-            <string>{KEY}</string>
-            <key>UDID</key>
-            <string>{UDID}</string>
-            <key>Admin</key>
-            <string>{ADMIN}</string>
-            <key>Zalo</key>
-            <string>{ZALO}</string>
-            <key>BonusLink</key>
-            <string>{BONUS_LINK}</string>
-        </dict>
-    </dict>
-'''
     
     expires_days = custom_config.get("expiresDays", 365)
     max_devices = custom_config.get("maxDevices", 1)
@@ -291,7 +247,7 @@ def delete_key(key_code, admin_username):
     return {"success": True}
 
 # ============================================================
-# HÀM TẠO FILE .MOBILECONFIG (ĐÃ SỬA UUID)
+# HÀM TẠO FILE .MOBILECONFIG (ĐÃ SỬA)
 # ============================================================
 def generate_mobile_config(key_data, udid):
     config = key_data.get("customConfig", {})
@@ -301,14 +257,13 @@ def generate_mobile_config(key_data, udid):
     identifier = config.get("payloadIdentifier", "com.duclam.config")
     custom_content = config.get("payloadContent", "")
     
-    # 🔥 THAY THẾ TẤT CẢ BIẾN
+    # 🔥 THAY THẾ BIẾN
     custom_content = custom_content.replace("{KEY}", key_data["keyCode"])
     custom_content = custom_content.replace("{UDID}", udid)
     custom_content = custom_content.replace("{ADMIN}", key_data["adminInfo"]["name"])
     custom_content = custom_content.replace("{ZALO}", key_data["adminInfo"]["zalo"])
     custom_content = custom_content.replace("{DATE}", datetime.now().strftime("%Y-%m-%d"))
     custom_content = custom_content.replace("{BONUS_LINK}", key_data.get("bonusFile", "No bonus file"))
-    custom_content = custom_content.replace("{UUID}", str(uuid.uuid4()))  # 🔥 THÊM DÒNG NÀY
     
     uuid_str = str(uuid.uuid4())
     
@@ -525,7 +480,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.send_response(401)
                 self.end_headers()
                 return
-            username = auth.replace("Bearer ", "")
+            username = auth.replace("Bearer ", ")
             admin = find_admin(username)
             if not admin or not admin.get("isActive", True):
                 self.send_response(403)
