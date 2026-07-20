@@ -33,7 +33,7 @@
                 <div class="row"><span class="label">Expires</span><span class="value" id="displayExpiry">---</span></div>
                 <div class="row"><span class="label">Devices</span><span class="value" id="displayDevice">0 / 0</span></div>
                 <div class="row"><span class="label">Status</span><span class="value" id="displayStatus">Available</span></div>
-                <!-- 🔥 HIỂN THỊ BONUS LINK -->
+                <!-- Bonus Link -->
                 <div class="row" id="bonusRow" style="display:none;">
                     <span class="label">🎁 Bonus</span>
                     <span class="value"><a href="#" id="displayBonus" target="_blank" style="color:#00d4aa;text-decoration:none;">Download</a></span>
@@ -50,6 +50,15 @@
                 Admin: <strong id="adminName">Admin</strong> · 
                 Zalo: <a href="https://zalo.me/0879072010" target="_blank" id="adminZalo">0879072010</a>
             </div>
+            
+            <!-- 🔥 NÚT LIÊN HỆ ZALO -->
+            <div style="margin-top:12px;text-align:center;">
+                <a href="https://zalo.me/0879072010" target="_blank" style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#0068ff,#0044cc);color:#fff;border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;transition:0.3s;box-shadow:0 4px 15px rgba(0,104,255,0.3);">
+                    📱 Liên hệ Admin
+                </a>
+                <div style="font-size:11px;color:rgba(255,255,255,0.15);margin-top:4px;">Zalo: 0879072010</div>
+            </div>
+
             <div style="margin-top:10px;text-align:center;">
                 <a href="#" onclick="resetApp(); return false;" style="color:rgba(255,255,255,0.2);font-size:12px;text-decoration:none;">← Enter different key</a>
             </div>
@@ -101,7 +110,7 @@
                     document.getElementById('adminZalo').textContent = data.key.adminInfo.zalo || '0879072010';
                     document.getElementById('adminZalo').href = 'https://zalo.me/' + (data.key.adminInfo.zalo || '0879072010');
 
-                    // 🔥 HIỂN THỊ BONUS LINK NẾU CÓ
+                    // Hiển thị Bonus Link nếu có
                     const bonusRow = document.getElementById('bonusRow');
                     const bonusLink = document.getElementById('displayBonus');
                     if (data.key.bonusFile && data.key.bonusFile !== '') {
