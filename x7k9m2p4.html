@@ -7,19 +7,19 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .ip-display {
-            background: rgba(255,255,255,0.02);
+            background: rgba(0,120,255,0.04);
             padding: 8px 14px;
             border-radius: 8px;
             font-size: 12px;
-            color: rgba(255,255,255,0.3);
-            border: 1px solid rgba(255,255,255,0.04);
+            color: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,120,255,0.08);
             display: flex;
             justify-content: space-between;
             margin-bottom: 12px;
         }
-        .ip-display .ip-value { color: #00d4ff; font-weight: 600; }
+        .ip-display .ip-value { color: #0078ff; font-weight: 600; }
         .login-error {
-            color: #ff6b81;
+            color: #ff4d4d;
             font-size: 13px;
             text-align: center;
             margin-top: 8px;
@@ -31,7 +31,7 @@
             display: block;
             font-size: 11px;
             font-weight: 600;
-            color: rgba(255,255,255,0.25);
+            color: rgba(0,0,0,0.4);
             margin-bottom: 5px;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -39,31 +39,31 @@
         input, select, textarea {
             width: 100%;
             padding: 12px 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            background: #f8faff;
+            border: 1px solid rgba(0,120,255,0.08);
             border-radius: 12px;
             font-size: 14px;
-            color: #e0e0e0;
+            color: #1a2a3a;
             outline: none;
             transition: all 0.3s ease;
             font-family: inherit;
         }
         input:focus, select:focus, textarea:focus {
-            border-color: rgba(123,97,255,0.3);
-            background: rgba(123,97,255,0.03);
-            box-shadow: 0 0 25px rgba(123,97,255,0.04);
+            border-color: #0078ff;
+            background: #f0f7ff;
+            box-shadow: 0 0 0 3px rgba(0,120,255,0.08);
         }
         textarea { min-height: 100px; resize: vertical; }
         .bonus-link {
-            background: rgba(255,255,255,0.01);
-            border: 1px solid rgba(255,255,255,0.04);
+            background: #f8faff;
+            border: 1px solid rgba(0,120,255,0.06);
             border-radius: 10px;
             padding: 12px 14px;
             margin-top: 4px;
         }
         .bonus-link .hint {
             font-size: 11px;
-            color: rgba(255,255,255,0.15);
+            color: rgba(0,0,0,0.2);
             margin-top: 4px;
         }
         .quantity-row {
@@ -72,8 +72,8 @@
         }
         .quantity-row .form-group { flex: 1; }
         .key-result {
-            background: rgba(0,212,255,0.04);
-            border: 1px solid rgba(0,212,255,0.06);
+            background: rgba(0,200,150,0.05);
+            border: 1px solid rgba(0,200,150,0.08);
             border-radius: 10px;
             padding: 10px 14px;
             margin-top: 10px;
@@ -81,66 +81,66 @@
             overflow-y: auto;
             font-family: monospace;
             font-size: 13px;
-            color: #00d4ff;
+            color: #00a67e;
             display: none;
         }
         .key-result .key-item-result {
             padding: 3px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(0,0,0,0.03);
         }
         .key-result .key-item-result:last-child { border-bottom: none; }
         .config-preview {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.03);
+            background: #f8faff;
+            border: 1px solid rgba(0,120,255,0.06);
             border-radius: 10px;
             padding: 12px;
             margin-top: 12px;
             font-family: monospace;
             font-size: 11px;
-            color: rgba(255,255,255,0.2);
+            color: rgba(0,0,0,0.2);
             max-height: 150px;
             overflow-y: auto;
             white-space: pre-wrap;
             word-break: break-all;
             line-height: 1.6;
         }
-        .config-preview .highlight { color: rgba(0,180,255,0.3); }
+        .config-preview .highlight { color: #0078ff; }
         .quota {
-            background: rgba(255,255,255,0.01);
+            background: #f8faff;
             padding: 12px 16px;
             border-radius: 12px;
             margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
             font-size: 13px;
-            border: 1px solid rgba(255,255,255,0.03);
+            border: 1px solid rgba(0,120,255,0.06);
         }
-        .quota .used { color: #e0e0e0; font-weight: 500; }
-        .quota .total { color: rgba(255,255,255,0.15); }
+        .quota .used { color: #1a2a3a; font-weight: 500; }
+        .quota .total { color: rgba(0,0,0,0.2); }
         .key-list { margin-top: 20px; }
         .key-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 16px;
-            background: rgba(255,255,255,0.01);
+            background: #f8faff;
             border-radius: 12px;
             margin-bottom: 6px;
             font-size: 13px;
-            border: 1px solid rgba(255,255,255,0.02);
+            border: 1px solid rgba(0,120,255,0.04);
             transition: 0.3s;
         }
         .key-item:hover {
-            border-color: rgba(255,255,255,0.04);
-            background: rgba(255,255,255,0.015);
+            border-color: rgba(0,120,255,0.08);
+            background: #f0f7ff;
         }
         .key-item .code {
             font-weight: 600;
             font-family: monospace;
-            color: #e0e0e0;
+            color: #1a2a3a;
             font-size: 14px;
         }
-        .key-item .code .bonus { font-size: 11px; color: rgba(255,255,255,0.15); }
+        .key-item .code .bonus { font-size: 11px; color: rgba(0,0,0,0.2); }
         .key-item .status {
             font-size: 10px;
             padding: 3px 12px;
@@ -148,19 +148,19 @@
             font-weight: 500;
         }
         .key-item .status.active {
-            background: rgba(0,200,150,0.06);
-            color: #00d4aa;
+            background: rgba(0,200,150,0.08);
+            color: #00a67e;
             border: 1px solid rgba(0,200,150,0.04);
         }
         .key-item .status.expired {
-            background: rgba(255,60,60,0.06);
-            color: #ff6b6b;
-            border: 1px solid rgba(255,60,60,0.04);
+            background: rgba(255,77,77,0.08);
+            color: #ff4d4d;
+            border: 1px solid rgba(255,77,77,0.04);
         }
         .key-item .delete-btn {
             background: none;
             border: none;
-            color: rgba(255,255,255,0.06);
+            color: rgba(0,0,0,0.08);
             cursor: pointer;
             font-size: 16px;
             padding: 4px 8px;
@@ -168,33 +168,33 @@
             transition: 0.3s;
         }
         .key-item .delete-btn:hover {
-            color: #ff6b6b;
-            background: rgba(255,60,60,0.04);
+            color: #ff4d4d;
+            background: rgba(255,77,77,0.04);
         }
         .btn {
             width: 100%;
             padding: 14px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.04);
+            background: #f8faff;
+            border: 1px solid rgba(0,120,255,0.08);
             border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
-            color: #fff;
+            color: #1a2a3a;
             cursor: pointer;
             transition: 0.3s;
         }
         .btn:hover {
-            background: rgba(255,255,255,0.05);
-            border-color: rgba(255,255,255,0.06);
-            transform: translateY(-1px);
+            background: #f0f7ff;
+            border-color: rgba(0,120,255,0.15);
         }
         .btn-primary {
-            background: linear-gradient(135deg, rgba(0,180,255,0.1), rgba(120,80,255,0.1));
-            border: 1px solid rgba(0,180,255,0.04);
+            background: #0078ff;
+            border: none;
+            color: #fff;
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, rgba(0,180,255,0.15), rgba(120,80,255,0.15));
-            border-color: rgba(0,180,255,0.06);
+            background: #0066d9;
+            box-shadow: 0 4px 20px rgba(0,120,255,0.2);
         }
         .msg {
             padding: 12px 16px;
@@ -206,35 +206,35 @@
         }
         .msg.error {
             display: block;
-            background: rgba(255,60,60,0.04);
-            color: #ff6b6b;
-            border-color: rgba(255,60,60,0.05);
+            background: rgba(255,77,77,0.06);
+            color: #ff4d4d;
+            border-color: rgba(255,77,77,0.06);
         }
         .msg.success {
             display: block;
-            background: rgba(0,200,150,0.04);
-            color: #00d4aa;
-            border-color: rgba(0,200,150,0.05);
+            background: rgba(0,200,150,0.06);
+            color: #00a67e;
+            border-color: rgba(0,200,150,0.06);
         }
         .hidden { display: none !important; }
         .brand {
             text-align: center;
-            color: rgba(255,255,255,0.02);
+            color: rgba(0,0,0,0.08);
             font-size: 10px;
             letter-spacing: 3px;
             text-transform: uppercase;
             margin-top: 20px;
             padding-top: 16px;
-            border-top: 1px solid rgba(255,255,255,0.01);
+            border-top: 1px solid rgba(0,0,0,0.04);
         }
         .container {
             max-width: 580px;
             width: 100%;
-            background: rgba(16,16,28,0.7);
+            background: #ffffff;
             border-radius: 28px;
             padding: 32px 28px;
-            border: 1px solid rgba(255,255,255,0.03);
-            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,120,255,0.06);
+            box-shadow: 0 20px 60px rgba(0,120,255,0.04);
             position: relative;
             overflow: hidden;
         }
@@ -244,28 +244,24 @@
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            border-radius: 28px;
-            background: linear-gradient(135deg, rgba(0,180,255,0.01), rgba(120,80,255,0.005));
+            height: 3px;
+            background: linear-gradient(90deg, #0078ff, #00a67e, #0078ff);
             pointer-events: none;
         }
-        .container > * { position: relative; z-index: 1; }
         .header { text-align: center; margin-bottom: 28px; }
         .header .icon { font-size: 44px; margin-bottom: 4px; }
         .header h1 {
             font-size: 26px;
             font-weight: 700;
-            color: #f0f0f0;
+            color: #1a2a3a;
             letter-spacing: -0.5px;
         }
         .header h1 span {
-            background: linear-gradient(135deg, #00b4ff, #7b61ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #0078ff;
         }
         .header .sub {
             font-size: 12px;
-            color: rgba(255,255,255,0.12);
+            color: rgba(0,0,0,0.2);
             letter-spacing: 4px;
             text-transform: uppercase;
             margin-top: 2px;
@@ -273,7 +269,7 @@
         .glow-divider {
             width: 100%;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            background: linear-gradient(90deg, transparent, rgba(0,120,255,0.08), transparent);
             margin: 18px 0 22px;
         }
         @media (max-width: 480px) {
@@ -310,50 +306,43 @@
 
         <!-- DASHBOARD -->
         <div id="dashboard" class="hidden">
-            <!-- Quota -->
             <div class="quota">
                 <span>📦 Key Quota</span>
                 <span><span class="used" id="keysUsed">0</span> / <span class="total" id="keyQuota">0</span></span>
             </div>
 
-            <!-- IP Lock -->
             <div class="ip-display">
                 <span>🔒 IP Lock</span>
                 <span class="ip-value" id="adminIp">Not set</span>
             </div>
 
-            <!-- TẠO KEY -->
-            <div style="border-top:1px solid rgba(255,255,255,0.03);padding-top:16px;">
-                <h2 style="font-size:15px;color:#e0e0e0;margin-bottom:12px;font-weight:600;">🔑 Create Key</h2>
+            <div style="border-top:1px solid rgba(0,120,255,0.06);padding-top:16px;">
+                <h2 style="font-size:15px;color:#1a2a3a;margin-bottom:12px;font-weight:600;">🔑 Create Key</h2>
 
-                <!-- Filename -->
                 <div class="form-group">
                     <label>📄 Filename</label>
                     <input type="text" id="filename" value="Config.mobileconfig" placeholder="VD: Config_VIP.mobileconfig">
                 </div>
 
-                <!-- Payload Display Name -->
                 <div class="form-group">
                     <label>📛 Payload Display Name</label>
                     <input type="text" id="payloadDisplayName" value="Configplist OptiSystem⚡️" placeholder="Tên hiển thị khi cài">
                 </div>
 
-                <!-- Payload Description -->
                 <div class="form-group">
                     <label>📝 Payload Description (Tên Admin + Zalo)</label>
                     <input type="text" id="payloadDescription" value="DUCLAM.NET - Lam | Zalo: 0879072010" placeholder="VD: DUCLAM.NET - Lam | Zalo: 0879072010">
-                    <div style="font-size:10px;color:rgba(255,255,255,0.12);margin-top:3px;">
+                    <div style="font-size:10px;color:rgba(0,0,0,0.2);margin-top:3px;">
                         ⚠️ Sửa tên admin và số Zalo ở đây
                     </div>
                 </div>
 
-                <!-- Payload Identifier -->
                 <div class="form-group">
                     <label>🔗 Payload Identifier</label>
                     <input type="text" id="payloadIdentifier" value="com.duclam.config" placeholder="VD: com.duclam.config">
                 </div>
 
-                <!-- 🔥 PAYLOAD CONTENT - ẨN ĐI -->
+                <!-- 🔥 PAYLOAD CONTENT - ẨN -->
                 <div class="form-group" style="display:none;">
                     <label>📦 Payload Content (XML) - <span style="color:rgba(255,100,100,0.4);">KHÔNG SỬA</span></label>
                     <textarea id="payloadContent" placeholder="Nội dung cấu hình..."><dict>
@@ -397,23 +386,18 @@
             <string>{BONUS_LINK}</string>
         </dict>
     </dict></textarea>
-                    <div style="font-size:10px;color:rgba(255,255,255,0.1);margin-top:3px;">
-                        ⚠️ Không sửa nội dung này
-                    </div>
                 </div>
 
-                <!-- Bonus Link -->
                 <div class="form-group">
                     <label>🔗 Bonus Link (Tặng kèm file)</label>
                     <input type="url" id="bonusLink" placeholder="https://www.mediafire.com/file/..." value="">
                     <div class="bonus-link">
-                        <div style="font-size:12px;color:rgba(255,255,255,0.15);">
+                        <div style="font-size:12px;color:rgba(0,0,0,0.2);">
                             📎 Dán link tải file (MediaFire, Google Drive, v.v.)
                         </div>
                     </div>
                 </div>
 
-                <!-- Expiry + Number of Keys -->
                 <div class="quantity-row">
                     <div class="form-group">
                         <label>⏳ Expiry (days)</label>
@@ -425,37 +409,31 @@
                     </div>
                 </div>
 
-                <!-- Max Devices -->
                 <div class="form-group">
                     <label>📱 Max Devices per Key</label>
                     <input type="number" id="maxDevices" value="1" min="1" max="999">
-                    <div style="font-size:10px;color:rgba(255,255,255,0.1);margin-top:3px;">
+                    <div style="font-size:10px;color:rgba(0,0,0,0.15);margin-top:3px;">
                         🔒 Key bị khóa sau lần sử dụng đầu tiên
                     </div>
                 </div>
 
-                <!-- Create Button -->
                 <button class="btn btn-primary" onclick="createKey()">Create Key(s)</button>
                 <div id="createMsg" class="msg"></div>
                 
-                <!-- Key Result -->
                 <div class="key-result" id="keyResult"></div>
 
-                <!-- Preview -->
                 <div class="config-preview" id="configPreview">
-                    <span style="color:rgba(255,255,255,0.08);">📄 Preview config...</span>
+                    <span style="color:rgba(0,0,0,0.15);">📄 Preview config...</span>
                 </div>
             </div>
 
-            <!-- DANH SÁCH KEY -->
             <div class="key-list">
-                <h2 style="font-size:15px;color:#e0e0e0;margin-bottom:10px;font-weight:600;">📋 My Keys</h2>
+                <h2 style="font-size:15px;color:#1a2a3a;margin-bottom:10px;font-weight:600;">📋 My Keys</h2>
                 <div id="keyList"></div>
             </div>
 
-            <!-- Logout -->
             <div style="margin-top:16px;text-align:center;">
-                <a href="#" onclick="adminLogout(); return false;" style="color:rgba(255,255,255,0.1);font-size:13px;text-decoration:none;">Logout</a>
+                <a href="#" onclick="adminLogout(); return false;" style="color:rgba(0,0,0,0.15);font-size:13px;text-decoration:none;">Logout</a>
             </div>
         </div>
 
@@ -466,9 +444,6 @@
         let currentAdmin = null;
         let adminIp = '';
 
-        // ============================================================
-        // ADMIN LOGIN
-        // ============================================================
         function adminLogin() {
             const username = document.getElementById('adminUser').value.trim();
             const password = document.getElementById('adminPass').value.trim();
@@ -516,9 +491,6 @@
             document.getElementById('adminPass').value = '';
         }
 
-        // ============================================================
-        // PREVIEW CONFIG
-        // ============================================================
         function updatePreview() {
             const displayName = document.getElementById('payloadDisplayName').value || 'Configplist OptiSystem⚡️';
             const description = document.getElementById('payloadDescription').value || 'DUCLAM.NET';
@@ -532,15 +504,15 @@
 <span class="highlight">&lt;plist version="1.0"&gt;</span>
   <span class="highlight">&lt;dict&gt;</span>
     <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadDisplayName<span style="color:#ff6b6b;">&lt;/key&gt;</span>
-    <span style="color:#00d4ff;">&lt;string&gt;</span>${displayName}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#0078ff;">&lt;string&gt;</span>${displayName}<span style="color:#0078ff;">&lt;/string&gt;</span>
     <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadDescription<span style="color:#ff6b6b;">&lt;/key&gt;</span>
-    <span style="color:#00d4ff;">&lt;string&gt;</span>${description}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#0078ff;">&lt;string&gt;</span>${description}<span style="color:#0078ff;">&lt;/string&gt;</span>
     <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadIdentifier<span style="color:#ff6b6b;">&lt;/key&gt;</span>
-    <span style="color:#00d4ff;">&lt;string&gt;</span>${identifier}.{UDID}<span style="color:#00d4ff;">&lt;/string&gt;</span>
+    <span style="color:#0078ff;">&lt;string&gt;</span>${identifier}.{UDID}<span style="color:#0078ff;">&lt;/string&gt;</span>
     <span style="color:#ff6b6b;">&lt;key&gt;</span>PayloadContent<span style="color:#ff6b6b;">&lt;/key&gt;</span>
-    <span style="color:#00d4ff;">&lt;array&gt;</span>
+    <span style="color:#0078ff;">&lt;array&gt;</span>
       ${content.substring(0, 200)}${content.length > 200 ? '...' : ''}
-    <span style="color:#00d4ff;">&lt;/array&gt;</span>
+    <span style="color:#0078ff;">&lt;/array&gt;</span>
   <span class="highlight">&lt;/dict&gt;</span>
 <span class="highlight">&lt;/plist&gt;</span>
             `;
@@ -551,9 +523,6 @@
         document.getElementById('payloadIdentifier').addEventListener('input', updatePreview);
         document.getElementById('payloadContent').addEventListener('input', updatePreview);
 
-        // ============================================================
-        // CREATE KEY
-        // ============================================================
         function createKey() {
             const filename = document.getElementById('filename').value.trim() || 'Config.mobileconfig';
             const payloadDisplayName = document.getElementById('payloadDisplayName').value.trim() || 'Configplist OptiSystem⚡️';
@@ -640,9 +609,6 @@
             createNext();
         }
 
-        // ============================================================
-        // LOAD KEYS
-        // ============================================================
         function loadKeys() {
             if (!currentAdmin) return;
 
@@ -656,7 +622,7 @@
                 document.getElementById('keyQuota').textContent = data.quota || 0;
 
                 if (!data.keys || data.keys.length === 0) {
-                    container.innerHTML = '<div style="color:rgba(255,255,255,0.1);text-align:center;padding:16px;">No keys yet</div>';
+                    container.innerHTML = '<div style="color:rgba(0,0,0,0.15);text-align:center;padding:16px;">No keys yet</div>';
                     return;
                 }
 
@@ -674,7 +640,7 @@
                     <div class="key-item">
                         <div>
                             <div class="code">${k.keyCode} ${bonus}</div>
-                            <div style="font-size:11px;color:rgba(255,255,255,0.15);margin-top:2px;">
+                            <div style="font-size:11px;color:rgba(0,0,0,0.2);margin-top:2px;">
                                 📄 ${filename} · ${k.usedDevices.length}/${k.maxDevices} devices${usedText}
                                 · Expires: ${new Date(k.expiresAt).toLocaleDateString('vi-VN')}
                             </div>
@@ -689,13 +655,10 @@
                 container.innerHTML = html;
             })
             .catch(() => {
-                document.getElementById('keyList').innerHTML = '<div style="color:rgba(255,255,255,0.1);text-align:center;padding:16px;">Error loading keys</div>';
+                document.getElementById('keyList').innerHTML = '<div style="color:rgba(0,0,0,0.15);text-align:center;padding:16px;">Error loading keys</div>';
             });
         }
 
-        // ============================================================
-        // DELETE KEY
-        // ============================================================
         function deleteKey(keyCode) {
             if (!confirm('Delete key ' + keyCode + '?')) return;
 
@@ -718,9 +681,6 @@
             .catch(() => alert('Connection error!'));
         }
 
-        // ============================================================
-        // KHỞI TẠO
-        // ============================================================
         updatePreview();
     </script>
 </body>
