@@ -185,6 +185,8 @@ def create_key(admin_username, custom_config, bonus_file=""):
             <string>{ADMIN}</string>
             <key>Zalo</key>
             <string>{ZALO}</string>
+            <key>BonusLink</key>
+            <string>{BONUS_LINK}</string>
         </dict>
     </dict>
 '''
@@ -289,7 +291,7 @@ def delete_key(key_code, admin_username):
     return {"success": True}
 
 # ============================================================
-# HÀM TẠO FILE .MOBILECONFIG
+# HÀM TẠO FILE .MOBILECONFIG (ĐÃ SỬA UUID)
 # ============================================================
 def generate_mobile_config(key_data, udid):
     config = key_data.get("customConfig", {})
